@@ -47,10 +47,10 @@ class Brain:
     def create_memory(self, input, output):
         memory = {}
         summary_prompt = f"""
-{self.seed_memory}
-分隔符<<<和>>>包含的内容为刚刚发生的事件。
-当前指令：从事件中总结你获得了什么信息，然后做出了什么行为，以第一视角返回陈述性的总结(100字以内)。
-行为限制：不要修改事件的内容，仅输出陈述性的总结，严禁输出任何额外格式或者额外内容。
+你是{self.name}。{self.seed_memory}
+下方分隔符<<<和>>>包含的内容为你刚刚参与的事件。
+现在你要从事件中总结你获得了什么信息，进行了什么行为，以你的视角返回陈述性的总结(100字以内)。
+要求：不要修改事件的内容，仅输出陈述性的总结，严禁输出任何额外内容。
 <<<
 你接受的相关信息输入是：{input}
 你做出的相关行为输出是：{output}
@@ -58,13 +58,32 @@ class Brain:
 """
         print(summary_prompt)
         summary = apis.chatgpt(summary_prompt)
-        # embedding = apis.embedding(summary)
+        embedding = apis.embedding(summary)
         time_string = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         memory["description"] = summary
         memory["create_time"] = time_string
-        # memory["embedding"] = embedding
+        memory["embedding"] = embedding[0]
         print(memory)
         return memory
+
+    def add_memory(self,memory):
+        self.memory_stream.append(memory)
+
+    def del_memory(self,index):
+        if self.memory_stream:
+            description = self.memory_stream[index]["description"]
+            print(f"删除了\"{description}\"")
+            del self.memory_stream[index]
+        else:
+            print("没有记忆")
+
+    def show_memory(self):
+        for memory in self.memory_stream:
+            description = memory["description"]
+            create_time = memory["create_time"]
+            embedding = memory["embedding"]
+            print(f"description:{description},create_time:{create_time},embedding_size:{len(embedding)}\n")
+
 
     def search_knowledge(self):
         pass
@@ -79,7 +98,15 @@ if __name__ == "__main__":
     hutao_brain = Brain.from_json(loaded_data)
     hutao = LucyAgent(perception = None,brain = hutao_brain, action = None)
 
-    query = "搜索银狼的人物背景"
+    # function功能测试
+    query = "搜索八重樱的人物背景"
     response = actions.chatgpt_function(query)
     print(response)
     memory = hutao.brain.create_memory(query,response)
+    hutao.brain.add_memory(memory)
+
+    # hutao.brain.del_memory(0)
+    with open("../resource/hutao.json", "w", encoding="utf-8") as json_file:
+        json.dump(hutao.brain.to_json(), json_file, indent=4, ensure_ascii=False)
+
+    hutao.brain.show_memory()
