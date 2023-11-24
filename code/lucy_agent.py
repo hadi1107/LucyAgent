@@ -28,9 +28,9 @@ class Brain:
         self.name = name
         self.seed_memory = seed_memory
         self.language_style = language_style
+        self.current_state = current_state
         self.basic_knowledge = basic_knowledge
         self.memory_stream = memory_stream
-        self.current_state = current_state
 
     def to_json(self):
         """将大脑的状态转换为JSON格式的字典。"""
@@ -38,8 +38,8 @@ class Brain:
             "name": self.name,
             "seed_memory": self.seed_memory,
             "language_style": self.language_style,
-            "basic_knowledge": self.basic_knowledge,
             "current_state": self.current_state,
+            "basic_knowledge": self.basic_knowledge,
             "memory_stream": self.memory_stream
         }
 
@@ -149,6 +149,7 @@ class Brain:
             print("---------------------------------------")
             print(f"知识描述: {text}\n嵌入向量大小: {len(embedding)}")
             print("---------------------------------------")
+
     def search_knowledge(self, query_text):
         """搜索知识的方法，只返回最相似的一个知识项"""
         # 计算查询文本的嵌入
@@ -194,6 +195,8 @@ if __name__ == "__main__":
     # 测试知识相关功能
     # text = "璃月，是游戏《原神》及其衍生作品中的国家，提瓦特大陆七国中的一国，位于大陆东方的富饶国度。其商港璃月港是全提瓦特大陆最繁华且吞吐量最大的港口"
     # hutao.brain.add_knowledge(text)
+    # knowledge = hutao.brain.search_knowledge("绝区零二测情况怎么说？")
+    # print(knowledge["text"])
 
     # query = "绝区零"
     # wiki_object = tools.get_wikipedia_text(query)  # 假设这个函数调用返回查询的响应。
@@ -204,8 +207,6 @@ if __name__ == "__main__":
     # 打印状态
     hutao.brain.show_memory()
     hutao.brain.show_knowledge()
-    knowledge = hutao.brain.search_knowledge("绝区零二测情况怎么说？")
-    print(knowledge["text"])
 
     # 将更新后的大脑状态保存到JSON文件中。
     try:
