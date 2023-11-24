@@ -1,0 +1,523 @@
+{
+    "_type": "SearchResponse",
+    "queryContext": {
+        "originalQuery": "知乎热榜"
+    },
+    "webPages": {
+        "webSearchUrl": "https://www.bing.com/search?q=%E7%9F%A5%E4%B9%8E%E7%83%AD%E6%A6%9C",
+        "totalEstimatedMatches": 4340000,
+        "value": [
+            {
+                "id": "https://api.bing.microsoft.com/api/v7/#WebPages.0",
+                "name": "知乎热榜 - 知乎",
+                "url": "https://www.zhihu.com/billboard",
+                "isFamilyFriendly": true,
+                "displayUrl": "https://www.zhihu.com/billboard",
+                "snippet": "知乎热榜 - 知乎 01 地球首次短暂突破 2℃ 升温警戒线，联合国发出警告，这意味着什么？ 将带来哪些影响？ 据新华社报道，欧洲联盟气候监测机构哥白尼气候变化服务局 11 月 20 日说，本月 17 日全球平均气温较工业化前的 1850 年至 1900 年间平均水平高 2.07℃，系有记录以来全球单日平均气温升温水平首次突破 2 摄氏度。 该机构称，初步数据显示，本月 18 日的全球平均气温升温水平同样超过 2℃，达到 2.06℃左右。",
+                "deepLinks": [
+                    {
+                        "name": "知乎",
+                        "url": "https://www.zhihu.com/signin",
+                        "snippet": "知乎 - 知乎热榜 - 知乎"
+                    },
+                    {
+                        "name": "搜索结果",
+                        "url": "https://www.zhihu.com/search?type=content&q=%E5%A3%81%E7%BA%B8",
+                        "snippet": "搜索结果 - 知乎热榜 - 知乎"
+                    },
+                    {
+                        "name": "网曝张小泉菜刀拍一下蒜就断了，如何看待客服称「我们的菜刀不能拍蒜」？这个解释合理吗？菜刀应怎么选",
+                        "url": "https://www.zhihu.com/question/543112928?utm_division=hot_list_page",
+                        "snippet": "其实清朝铁匠也能部分实现，现代技术比那时高明不知多少，你想分块调节，让各处性能不一样也行。别说菜刀，你好好做，做成细长的战刀拍蒜也没问题。刀拍碎了，就是热处理工艺没控制好，或者用了整体高碳钢，没啥好洗的。"
+                    },
+                    {
+                        "name": "植物大战僵尸",
+                        "url": "https://www.zhihu.com/question/427608677?utm_division=hot_list_page",
+                        "snippet": "植物大战僵尸 - 知乎热榜 - 知乎"
+                    },
+                    {
+                        "name": "武松在景阳冈喝了18碗酒，外加两斤熟牛肉，正常人的胃一次性能塞这么多东西下去吗",
+                        "url": "https://www.zhihu.com/question/36171900?utm_division=hot_list_page",
+                        "snippet": "十八碗酒不太了解，两斤熟牛肉我有经验。当年生大娃的时候，因为娃不乖，臀位，只能剖腹产，头天入院做了一堆检查，签了各种文件，护士晚上九点多的时候来通知是第二天的第一场手术，晚上12点之后禁食禁水。"
+                    },
+                    {
+                        "name": "大平层",
+                        "url": "https://www.zhihu.com/question/457661420?utm_division=hot_list_page",
+                        "snippet": "知乎 知学堂 发现 等你来答 切换模式 登录/注册 房地产 家居 买房 有钱人 大平层 ... 别墅更适合一个大家族住在一起，热热闹闹，还有专门的管家、女佣、保姆等，族群大。而各位想一想，别墅大量流行的时候，是不是也是改革开放后，90年代到 ..."
+                    }
+                ],
+                "dateLastCrawled": "2023-11-23T08:09:00.0000000Z",
+                "cachedPageUrl": "http://cncc.bingj.com/cache.aspx?q=%E7%9F%A5%E4%B9%8E%E7%83%AD%E6%A6%9C&d=4831378972085922&mkt=zh-CN&setlang=zh-CN&w=jGnp94jFqWeVDq38mKlHm6Jx23HmkQyi",
+                "language": "zh_chs",
+                "isNavigational": true
+            },
+            {
+                "id": "https://api.bing.microsoft.com/api/v7/#WebPages.1",
+                "name": "知乎 热榜 今日热榜",
+                "url": "https://tophub.today/n/mproPpoq6O",
+                "isFamilyFriendly": true,
+                "displayUrl": "https://tophub.today/n/mproPpoq6O",
+                "snippet": "今日热榜提供各站热榜聚合：微信、今日头条、百度、知乎、V2EX、微博、贴吧、豆瓣、天涯、虎扑、Github、抖音...追踪全网热点、简单高效阅读。.",
+                "dateLastCrawled": "2023-11-23T14:42:00.0000000Z",
+                "cachedPageUrl": "http://cncc.bingj.com/cache.aspx?q=%E7%9F%A5%E4%B9%8E%E7%83%AD%E6%A6%9C&d=4574831987130569&mkt=zh-CN&setlang=zh-CN&w=ByFH1jGh5FogZI7Ok83aUo1lg69gtVtU",
+                "language": "zh_chs",
+                "isNavigational": false
+            },
+            {
+                "id": "https://api.bing.microsoft.com/api/v7/#WebPages.2",
+                "name": "今日热榜 - 知乎",
+                "url": "https://rebang.today/?tab=zhihu",
+                "datePublished": "2023-10-23T08:00:00.0000000",
+                "datePublishedDisplayText": "2023年10月23日",
+                "isFamilyFriendly": true,
+                "displayUrl": "https://rebang.today/?tab=zhihu",
+                "snippet": "今日热榜 - 知乎 1 消息称鸿蒙系统明年将不兼容安卓，华为相关人士表示「未来为三个各自独立的操作系统」，哪些信息值得关注？ 每经 AI 快讯，有消息称华为可能明年推出不兼容安卓的鸿蒙版本。 11 月 20 日，一华为相关人士表示：推出时间还不确定，未来 iOS 、鸿蒙、安卓将为三个各自独立的系统。 (澎湃新闻) 网传鸿蒙系统 312 万热度 2 中国与沙特签署双边本币互换协议，规模为 500 亿元人民币 /260 亿沙特里亚尔，将产生哪些影响？ 经国务院批准，近日中国人民银行与沙特中央银行签署了双边本币互换协议，互换规模为 500 亿元人民币 /260 亿沙特里亚尔，协议有效期三年，经双方同意可以展期。 中沙建立双边本币互换安排，将有助于加强两 277 万热度 3",
+                "dateLastCrawled": "2023-11-23T02:02:00.0000000Z",
+                "language": "zh_chs",
+                "isNavigational": false
+            }
+        ],
+        "someResultsRemoved": true
+    },
+    "entities": {
+        "value": [
+            {
+                "id": "https://api.bing.microsoft.com/api/v7/#Entities.0",
+                "entityPresentationInfo": {
+                    "entityScenario": "DominantEntity"
+                },
+                "bingId": "5938c6eb-43f9-29fb-36d5-bd90d05c9b0c"
+            }
+        ]
+    },
+    "news": {
+        "id": "https://api.bing.microsoft.com/api/v7/#News",
+        "readLink": "https://api.bing.microsoft.com/api/v7/news/search?q=%E7%9F%A5%E4%B9%8E%E7%83%AD%E6%A6%9C",
+        "value": [
+            {
+                "contractualRules": [
+                    {
+                        "_type": "ContractualRules/TextAttribution",
+                        "text": "新浪网"
+                    }
+                ],
+                "name": "知乎周源：GPT成本一定会下降，现所有商业模式都付不起这个钱",
+                "url": "https://finance.sina.com.cn/stock/relnews/us/2023-11-14/doc-imzuqcmu6468597.shtml",
+                "image": {
+                    "contentUrl": "https://n.sinaimg.cn/spider20231114/289/w1080h809/20231114/09eb-a3eda349feb856fba790383a049a9dac.jpg",
+                    "thumbnail": {
+                        "contentUrl": "https://www.bing.com/th?id=OVFT.eOjLyi-2Yka-PoW0jaTEYS&pid=News",
+                        "width": 700,
+                        "height": 524
+                    }
+                },
+                "description": "对于当下行业普遍关心的商业化落地问题，周源向媒体指出，包括美国在内目前都在探索怎么降低成本，“GPT过去几次反复提到降低成本，为什么要提降低成本？就是现有的所有的商业模式付不起这个钱。”他直言，现有所有的商业模式都付不起这个钱，肯定算不过来这个账。但从技术发展来说，这个成本一定会下降。",
+                "provider": [
+                    {
+                        "_type": "Organization",
+                        "name": "新浪网",
+                        "image": {
+                            "thumbnail": {
+                                "contentUrl": "https://www.bing.com/th?id=ODF.Zg4miZTZWyD26Ur6jfTwGQ&pid=news"
+                            }
+                        }
+                    }
+                ],
+                "datePublished": "2023-11-14T02:54:00.0000000Z",
+                "category": "ScienceAndTechnology"
+            },
+            {
+                "contractualRules": [
+                    {
+                        "_type": "ContractualRules/TextAttribution",
+                        "text": "腾讯网"
+                    }
+                ],
+                "name": "知乎商业市场总经理张炎确认出席第八届MS灵眸大赏",
+                "url": "https://new.qq.com/rain/a/20231111A04TMF00",
+                "description": "第八届灵眸大赏以「回归」为主题，围绕“深耕国内市场·回归”与“放眼全球战略 ·未来”两大主题日，共设8个分会场，开展为期两天的议程。届时，Morketing将会邀请消费、品牌、电商、文娱、游戏、新科技、出海等不同行业，多领域领头羊齐聚，共话营销，畅谈全球商业发展。",
+                "provider": [
+                    {
+                        "_type": "Organization",
+                        "name": "腾讯网",
+                        "image": {
+                            "thumbnail": {
+                                "contentUrl": "https://www.bing.com/th?id=ODF.z5yLgSgBNRsE9jRkGGoXPg&pid=news"
+                            }
+                        }
+                    }
+                ],
+                "datePublished": "2023-11-11T07:06:00.0000000Z"
+            }
+        ]
+    },
+    "videos": {
+        "id": "https://api.bing.microsoft.com/api/v7/#Videos",
+        "readLink": "https://api.bing.microsoft.com/api/v7/videos/search?q=%E7%9F%A5%E4%B9%8E%E7%83%AD%E6%A6%9C",
+        "webSearchUrl": "https://www.bing.com/videos/search?q=%E7%9F%A5%E4%B9%8E%E7%83%AD%E6%A6%9C",
+        "isFamilyFriendly": true,
+        "value": [
+            {
+                "webSearchUrl": "https://www.bing.com/videos/search?q=%E7%9F%A5%E4%B9%8E%E7%83%AD%E6%A6%9C&view=detail&mid=A43F63B4657416B055AEA43F63B4657416B055AE",
+                "name": "热搜记录, 知乎热榜, 知乎热榜20230423",
+                "description": "热搜记录, 知乎热榜, 知乎热榜20230423, 视频播放量 6、弹幕量 0、点赞数 0、投硬币枚数 0、收藏人数 0、转发人数 0, 视频作者 不可说2019, 作者简介 ，相关视频：文学与哲学的区别是什么?, 热搜记录, 知乎热榜, 知乎热榜20230423，早起空腹跑步真的可以瘦吗 ...",
+                "thumbnailUrl": "https://tse4-mm.cn.bing.net/th?id=OVP.rQMrMb5AXrSSO7iCINemsAIIFF&pid=Api",
+                "datePublished": "2023-04-23T12:29:56.0000000",
+                "publisher": [
+                    {
+                        "name": "bilibili"
+                    }
+                ],
+                "creator": {
+                    "name": "不可说2019"
+                },
+                "contentUrl": "https://www.bilibili.com/video/BV1LM4y1a7VN/?uid=4256314C4D3479316137564E",
+                "hostPageUrl": "https://www.bilibili.com/video/BV1LM4y1a7VN/?uid=4256314C4D3479316137564E",
+                "encodingFormat": "",
+                "hostPageDisplayUrl": "https://www.bilibili.com/video/BV1LM4y1a7VN/?uid=4256314C4D3479316137564E",
+                "width": 1152,
+                "height": 720,
+                "duration": "PT3M30S",
+                "embedHtml": "<iframe src=\"https://player.bilibili.com/player.html?aid=910299664&bvid=BV1LM4y1a7VN&cid=1106529321&page=1&autoplay=1\" scrolling=\"no\" border=\"0\" frameborder=\"no\" framespacing=\"0\" allowfullscreen=\"true\"> </iframe>",
+                "allowHttpsEmbed": true,
+                "viewCount": 6,
+                "thumbnail": {
+                    "width": 160,
+                    "height": 100
+                },
+                "allowMobileEmbed": true,
+                "isSuperfresh": false
+            },
+            {
+                "webSearchUrl": "https://www.bing.com/videos/search?q=%E7%9F%A5%E4%B9%8E%E7%83%AD%E6%A6%9C&view=detail&mid=1BC45F5C1760A00D94FC1BC45F5C1760A00D94FC",
+                "name": "来看看ai怎么回答知乎热榜20",
+                "description": "科技视频：来看看ai怎么回答知乎热榜20",
+                "thumbnailUrl": "https://tse4-mm.cn.bing.net/th?id=OVP.PYvnkkScj66aerznKewZigEsCo&pid=Api",
+                "datePublished": "2023-05-14T04:58:00.0000000",
+                "publisher": [
+                    {
+                        "name": "sohu"
+                    }
+                ],
+                "creator": {
+                    "name": "深科学简单说"
+                },
+                "contentUrl": "https://tv.sohu.com/v/dXMvMzM1OTQyNzI3LzQ0NTg2ODUwNi5zaHRtbA==.html",
+                "hostPageUrl": "https://tv.sohu.com/v/dXMvMzM1OTQyNzI3LzQ0NTg2ODUwNi5zaHRtbA==.html",
+                "encodingFormat": "mp4",
+                "hostPageDisplayUrl": "https://tv.sohu.com/v/dXMvMzM1OTQyNzI3LzQ0NTg2ODUwNi5zaHRtbA==.html",
+                "width": 960,
+                "height": 540,
+                "duration": "PT2M4S",
+                "motionThumbnailUrl": "https://tse4-mm.cn.bing.net/th?id=OM1._JQNoGAXXF_EGw_1697766601&pid=Api",
+                "embedHtml": "<iframe frameborder=\"0\" src=\"https://tv.sohu.com/s/sohuplayer/iplay.html?bid=445868506&autoplay=true&disablePlaylist=true\" width=\"810\" height=\"440\" allowfullscreen=\"true\" scrolling=\"no\"></iframe>",
+                "allowHttpsEmbed": true,
+                "thumbnail": {
+                    "width": 160,
+                    "height": 89
+                },
+                "allowMobileEmbed": true,
+                "isSuperfresh": false
+            },
+            {
+                "webSearchUrl": "https://www.bing.com/videos/search?q=%E7%9F%A5%E4%B9%8E%E7%83%AD%E6%A6%9C&view=detail&mid=3F5EF21B23BEF706B43A3F5EF21B23BEF706B43A",
+                "name": "知乎热榜怎么上？揭秘知乎上热榜的技巧",
+                "description": "知乎热榜怎么上？揭秘知乎上热榜的技巧, 视频播放量 87、弹幕量 0、点赞数 0、投硬币枚数 0、收藏人数 0、转发人数 0, 视频作者 伯乐网络传媒, 作者简介 ，相关视频：公众号推文文案怎么写？四步轻松搞定！，微信公众号的图文应该怎样设置？超详细讲解 ...",
+                "thumbnailUrl": "https://tse4-mm.cn.bing.net/th?id=OVP.Ld0RMIcjLLWLWcVa6eXrzQIIFF&pid=Api",
+                "datePublished": "2023-06-02T09:44:44.0000000",
+                "publisher": [
+                    {
+                        "name": "bilibili"
+                    }
+                ],
+                "creator": {
+                    "name": "伯乐网络传媒"
+                },
+                "contentUrl": "https://www.bilibili.com/video/BV1p24y1P7qx/?uid=425631703234793150377178",
+                "hostPageUrl": "https://www.bilibili.com/video/BV1p24y1P7qx/?uid=425631703234793150377178",
+                "encodingFormat": "",
+                "hostPageDisplayUrl": "https://www.bilibili.com/video/BV1p24y1P7qx/?uid=425631703234793150377178",
+                "width": 1080,
+                "height": 675,
+                "duration": "PT1M11S",
+                "embedHtml": "<iframe src=\"https://player.bilibili.com/player.html?aid=784281074&bvid=BV1p24y1P7qx&cid=1150430596&page=1&autoplay=1\" scrolling=\"no\" border=\"0\" frameborder=\"no\" framespacing=\"0\" allowfullscreen=\"true\"> </iframe>",
+                "allowHttpsEmbed": true,
+                "viewCount": 87,
+                "thumbnail": {
+                    "width": 160,
+                    "height": 100
+                },
+                "allowMobileEmbed": true,
+                "isSuperfresh": false
+            },
+            {
+                "webSearchUrl": "https://www.bing.com/videos/search?q=%E7%9F%A5%E4%B9%8E%E7%83%AD%E6%A6%9C&view=detail&mid=64012785D1537FB46E9064012785D1537FB46E90",
+                "name": "19知乎热榜",
+                "description": "-, 视频播放量 1、弹幕量 0、点赞数 0、投硬币枚数 0、收藏人数 0、转发人数 0, 视频作者 疯狂补课, 作者简介 你要把东西消化掉 成为你自己的血肉，相关视频：4.3 这就叫本末倒置，战斗名族又一大尺度之作，为艺术奉献——张津瑜..，猫猫呀 这样喊它会很开心 ...",
+                "thumbnailUrl": "https://tse2-mm.cn.bing.net/th?id=OVP.EzERD3wd-a3e5lS7K4icXQEEII&pid=Api",
+                "datePublished": "2023-08-19T05:59:22.0000000",
+                "publisher": [
+                    {
+                        "name": "bilibili"
+                    }
+                ],
+                "creator": {
+                    "name": "疯狂补课"
+                },
+                "contentUrl": "https://www.bilibili.com/video/BV1zP411s7Ls/?uid=4256317A5034313173374C73",
+                "hostPageUrl": "https://www.bilibili.com/video/BV1zP411s7Ls/?uid=4256317A5034313173374C73",
+                "encodingFormat": "",
+                "hostPageDisplayUrl": "https://www.bilibili.com/video/BV1zP411s7Ls/?uid=4256317A5034313173374C73",
+                "width": 812,
+                "height": 1620,
+                "duration": "PT14S",
+                "embedHtml": "<iframe src=\"https://player.bilibili.com/player.html?aid=317422349&bvid=BV1zP411s7Ls&cid=1239488969&page=1&autoplay=1\" scrolling=\"no\" border=\"0\" frameborder=\"no\" framespacing=\"0\" allowfullscreen=\"true\"> </iframe>",
+                "allowHttpsEmbed": true,
+                "viewCount": 1,
+                "thumbnail": {
+                    "width": 80,
+                    "height": 160
+                },
+                "allowMobileEmbed": true,
+                "isSuperfresh": false
+            },
+            {
+                "webSearchUrl": "https://www.bing.com/videos/search?q=%E7%9F%A5%E4%B9%8E%E7%83%AD%E6%A6%9C&view=detail&mid=9E5EF4A4681CFB2580D29E5EF4A4681CFB2580D2",
+                "name": "热搜记录 知乎热榜 知乎热榜20230421",
+                "description": "热搜记录 知乎热榜 知乎热榜20230421, 视频播放量 15、弹幕量 0、点赞数 0、投硬币枚数 0、收藏人数 0、转发人数 0, 视频作者 不可说2019, 作者简介 ，相关视频：热搜记录 知乎热榜 知乎热榜20230421，热搜记录, 知乎热榜, 知乎热榜20230423，热搜记录, 知乎热榜 ...",
+                "thumbnailUrl": "https://tse4-mm.cn.bing.net/th?id=OVP.1Ny1-HTRfRLPERqVNQqR-wEsC7&pid=Api",
+                "datePublished": "2023-04-21T06:41:02.0000000",
+                "publisher": [
+                    {
+                        "name": "bilibili"
+                    }
+                ],
+                "creator": {
+                    "name": "不可说2019"
+                },
+                "contentUrl": "https://www.bilibili.com/video/BV15o4y1b7dT/?uid=425631356F34793162376454",
+                "hostPageUrl": "https://www.bilibili.com/video/BV15o4y1b7dT/?uid=425631356F34793162376454",
+                "encodingFormat": "",
+                "hostPageDisplayUrl": "https://www.bilibili.com/video/BV15o4y1b7dT/?uid=425631356F34793162376454",
+                "width": 1152,
+                "height": 720,
+                "duration": "PT4M3S",
+                "embedHtml": "<iframe src=\"https://player.bilibili.com/player.html?aid=397770416&bvid=BV15o4y1b7dT&cid=1103735823&page=1&autoplay=1\" scrolling=\"no\" border=\"0\" frameborder=\"no\" framespacing=\"0\" allowfullscreen=\"true\"> </iframe>",
+                "allowHttpsEmbed": true,
+                "viewCount": 15,
+                "thumbnail": {
+                    "width": 160,
+                    "height": 99
+                },
+                "allowMobileEmbed": true,
+                "isSuperfresh": false
+            },
+            {
+                "webSearchUrl": "https://www.bing.com/videos/search?q=%E7%9F%A5%E4%B9%8E%E7%83%AD%E6%A6%9C&view=detail&mid=4234CDFDF75343464AED4234CDFDF75343464AED",
+                "name": "知乎推文《热榜直播》",
+                "description": "知乎推文《热榜直播》, 视频播放量 79714、弹幕量 146、点赞数 3424、投硬币枚数 33、收藏人数 1162、转发人数 77, 视频作者 摸鱼大户wa, 作者简介 ，相关视频：《缓缓病娇》病娇文推荐，小说推文后续知乎搜书名。，《校霸中意我 ...",
+                "thumbnailUrl": "https://tse2-mm.cn.bing.net/th?id=OVP.c-33lCfmJQJ9ZbZCiJ3ZeAIIFF&pid=Api",
+                "datePublished": "2023-02-19T10:06:35.0000000",
+                "publisher": [
+                    {
+                        "name": "bilibili"
+                    }
+                ],
+                "creator": {
+                    "name": "摸鱼大户wa"
+                },
+                "contentUrl": "https://www.bilibili.com/video/BV1T54y1A7ZP/?uid=425631543534793141375A50",
+                "hostPageUrl": "https://www.bilibili.com/video/BV1T54y1A7ZP/?uid=425631543534793141375A50",
+                "encodingFormat": "",
+                "hostPageDisplayUrl": "https://www.bilibili.com/video/BV1T54y1A7ZP/?uid=425631543534793141375A50",
+                "width": 1080,
+                "height": 675,
+                "duration": "PT10M25S",
+                "embedHtml": "<iframe src=\"https://player.bilibili.com/player.html?aid=864746931&bvid=BV1T54y1A7ZP&cid=1015561753&page=1&autoplay=1\" scrolling=\"no\" border=\"0\" frameborder=\"no\" framespacing=\"0\" allowfullscreen=\"true\"> </iframe>",
+                "allowHttpsEmbed": true,
+                "viewCount": 79834,
+                "thumbnail": {
+                    "width": 160,
+                    "height": 100
+                },
+                "allowMobileEmbed": true,
+                "isSuperfresh": false
+            },
+            {
+                "webSearchUrl": "https://www.bing.com/videos/search?q=%E7%9F%A5%E4%B9%8E%E7%83%AD%E6%A6%9C&view=detail&mid=94072CB65A66B0F77AD394072CB65A66B0F77AD3",
+                "name": "知乎今日热点05.03",
+                "description": "知乎热榜TOP15热度为重新计算, 视频播放量 151、弹幕量 0、点赞数 0、投硬币枚数 0、收藏人数 0、转发人数 0, 视频作者 qr11111111, 作者简介 （大概吧）zzzzzzzzzzz........，相关视频：知乎今日热点12.15，知乎今日热点12.10，知乎今日热点3.12，知乎今日热点12.13 ...",
+                "thumbnailUrl": "https://tse4-mm.cn.bing.net/th?id=OVP.vajEwqkaG-d7ITWrTStvBQEsC7&pid=Api",
+                "datePublished": "2023-05-03T13:23:04.0000000",
+                "publisher": [
+                    {
+                        "name": "bilibili"
+                    }
+                ],
+                "creator": {
+                    "name": "qr11111111"
+                },
+                "contentUrl": "https://www.bilibili.com/video/BV1Ls4y1X7xj/?uid=4256314C733479315837786A",
+                "hostPageUrl": "https://www.bilibili.com/video/BV1Ls4y1X7xj/?uid=4256314C733479315837786A",
+                "encodingFormat": "",
+                "hostPageDisplayUrl": "https://www.bilibili.com/video/BV1Ls4y1X7xj/?uid=4256314C733479315837786A",
+                "width": 1728,
+                "height": 1080,
+                "duration": "PT1M13S",
+                "embedHtml": "<iframe src=\"https://player.bilibili.com/player.html?aid=995684725&bvid=BV1Ls4y1X7xj&cid=1117323789&page=1&autoplay=1\" scrolling=\"no\" border=\"0\" frameborder=\"no\" framespacing=\"0\" allowfullscreen=\"true\"> </iframe>",
+                "allowHttpsEmbed": true,
+                "viewCount": 151,
+                "thumbnail": {
+                    "width": 160,
+                    "height": 99
+                },
+                "allowMobileEmbed": true,
+                "isSuperfresh": false
+            },
+            {
+                "webSearchUrl": "https://www.bing.com/videos/search?q=%E7%9F%A5%E4%B9%8E%E7%83%AD%E6%A6%9C&view=detail&mid=CCC7FF73C26F406EBF1ACCC7FF73C26F406EBF1A",
+                "name": "用python的requests爬知乎热榜，包含：热榜排名, 热榜标题, 热榜链接, 热度值, 回答数, 热榜描述。",
+                "description": "用python的requests爬知乎热榜，包含：热榜排名, 热榜标题, 热榜链接, 热度值, 回答数, 热榜描述。, 视频播放量 325、弹幕量 3、点赞数 7、投硬币枚数 2、收藏人数 6、转发人数 0, 视频作者 马哥小迷弟132, 作者简介 python源码都在 -> 公众号“老男孩的平凡之路 ...",
+                "thumbnailUrl": "https://tse2-mm.cn.bing.net/th?id=OVP.oDQAVp_1o2Q6_Iibar7okAEsC7&pid=Api",
+                "datePublished": "2023-07-24T04:26:25.0000000",
+                "publisher": [
+                    {
+                        "name": "bilibili"
+                    }
+                ],
+                "creator": {
+                    "name": "马哥小迷弟132"
+                },
+                "contentUrl": "https://www.bilibili.com/video/BV1AX4y1n7hX/?uid=42563141583479316E376858",
+                "hostPageUrl": "https://www.bilibili.com/video/BV1AX4y1n7hX/?uid=42563141583479316E376858",
+                "encodingFormat": "",
+                "hostPageDisplayUrl": "https://www.bilibili.com/video/BV1AX4y1n7hX/?uid=42563141583479316E376858",
+                "width": 1728,
+                "height": 1080,
+                "duration": "PT5M32S",
+                "embedHtml": "<iframe src=\"https://player.bilibili.com/player.html?aid=358767552&bvid=BV1AX4y1n7hX&cid=1207888455&page=1&autoplay=1\" scrolling=\"no\" border=\"0\" frameborder=\"no\" framespacing=\"0\" allowfullscreen=\"true\"> </iframe>",
+                "allowHttpsEmbed": true,
+                "viewCount": 326,
+                "thumbnail": {
+                    "width": 160,
+                    "height": 99
+                },
+                "allowMobileEmbed": true,
+                "isSuperfresh": false
+            },
+            {
+                "webSearchUrl": "https://www.bing.com/videos/search?q=%E7%9F%A5%E4%B9%8E%E7%83%AD%E6%A6%9C&view=detail&mid=86C6718934A1CE71234986C6718934A1CE712349",
+                "name": "Python爬取知乎热榜问题数据",
+                "description": "Python爬取知乎热榜问题数据, 视频播放量 284、弹幕量 0、点赞数 9、投硬币枚数 8、收藏人数 9、转发人数 0, 视频作者 吃着不想停, 作者简介 Python相关资料的可以加UP主vx：Luren188764【源码、学习路线图、电子书、软件】都会分享，相关视频：Python爬取抖音APP ...",
+                "thumbnailUrl": "https://tse2-mm.cn.bing.net/th?id=OVP.k9I-pvC8TYX3SIVPWTKoVgIIFE&pid=Api",
+                "datePublished": "2023-03-04T08:19:06.0000000",
+                "publisher": [
+                    {
+                        "name": "bilibili"
+                    }
+                ],
+                "creator": {
+                    "name": "吃着不想停"
+                },
+                "contentUrl": "https://www.bilibili.com/video/BV1yN411F7dU/?uid=425631794E34313146376455",
+                "hostPageUrl": "https://www.bilibili.com/video/BV1yN411F7dU/?uid=425631794E34313146376455",
+                "encodingFormat": "",
+                "hostPageDisplayUrl": "https://www.bilibili.com/video/BV1yN411F7dU/?uid=425631794E34313146376455",
+                "width": 1146,
+                "height": 716,
+                "duration": "PT29M35S",
+                "embedHtml": "<iframe src=\"https://player.bilibili.com/player.html?aid=310441756&bvid=BV1yN411F7dU&cid=1038871736&page=1&autoplay=1\" scrolling=\"no\" border=\"0\" frameborder=\"no\" framespacing=\"0\" allowfullscreen=\"true\"> </iframe>",
+                "allowHttpsEmbed": true,
+                "viewCount": 293,
+                "thumbnail": {
+                    "width": 160,
+                    "height": 99
+                },
+                "allowMobileEmbed": true,
+                "isSuperfresh": false
+            },
+            {
+                "webSearchUrl": "https://www.bing.com/videos/search?q=%E7%9F%A5%E4%B9%8E%E7%83%AD%E6%A6%9C&view=detail&mid=F63E5C2CAB988BDBB3F3F63E5C2CAB988BDBB3F3",
+                "name": "知乎小白引流变现全辅导：三个维度全面解析热榜，让你获得全站曝光",
+                "description": "热榜在知乎这样的平台无疑是一个巨大的流量入口。以前知乎的内容分发机制只是基于你关注的人和话题，根据你的关注来给你推送相关的回答，而热榜是根据问题的热度来对站内的内容进行分发。而这些上榜的问题一般都会有数百万甚至数千万的热度 ...",
+                "thumbnailUrl": "https://tse2-mm.cn.bing.net/th?id=OVP.68P3ZhDxOAZFyA5_iYj_zgIIFE&pid=Api",
+                "datePublished": "2023-04-19T11:11:39.0000000",
+                "publisher": [
+                    {
+                        "name": "bilibili"
+                    }
+                ],
+                "creator": {
+                    "name": "副业教程"
+                },
+                "contentUrl": "https://www.bilibili.com/video/BV1PP411D7md/?uid=425631505034313144376D64",
+                "hostPageUrl": "https://www.bilibili.com/video/BV1PP411D7md/?uid=425631505034313144376D64",
+                "encodingFormat": "",
+                "hostPageDisplayUrl": "https://www.bilibili.com/video/BV1PP411D7md/?uid=425631505034313144376D64",
+                "width": 800,
+                "height": 499,
+                "duration": "PT15M16S",
+                "embedHtml": "<iframe src=\"https://player.bilibili.com/player.html?aid=312713921&bvid=BV1PP411D7md&cid=1101601137&page=1&autoplay=1\" scrolling=\"no\" border=\"0\" frameborder=\"no\" framespacing=\"0\" allowfullscreen=\"true\"> </iframe>",
+                "allowHttpsEmbed": true,
+                "viewCount": 20,
+                "thumbnail": {
+                    "width": 160,
+                    "height": 99
+                },
+                "allowMobileEmbed": true,
+                "isSuperfresh": false
+            }
+        ],
+        "scenario": "List"
+    },
+    "rankingResponse": {
+        "mainline": {
+            "items": [
+                {
+                    "answerType": "WebPages",
+                    "resultIndex": 0,
+                    "value": {
+                        "id": "https://api.bing.microsoft.com/api/v7/#WebPages.0"
+                    }
+                },
+                {
+                    "answerType": "WebPages",
+                    "resultIndex": 1,
+                    "value": {
+                        "id": "https://api.bing.microsoft.com/api/v7/#WebPages.1"
+                    }
+                },
+                {
+                    "answerType": "WebPages",
+                    "resultIndex": 2,
+                    "value": {
+                        "id": "https://api.bing.microsoft.com/api/v7/#WebPages.2"
+                    }
+                },
+                {
+                    "answerType": "News",
+                    "value": {
+                        "id": "https://api.bing.microsoft.com/api/v7/#News"
+                    }
+                },
+                {
+                    "answerType": "Videos",
+                    "value": {
+                        "id": "https://api.bing.microsoft.com/api/v7/#Videos"
+                    }
+                }
+            ]
+        },
+        "sidebar": {
+            "items": [
+                {
+                    "answerType": "Entities",
+                    "resultIndex": 0,
+                    "value": {
+                        "id": "https://api.bing.microsoft.com/api/v7/#Entities.0"
+                    }
+                }
+            ]
+        }
+    }
+}

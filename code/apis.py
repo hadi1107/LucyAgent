@@ -1,3 +1,6 @@
+"""
+apis.py:定义需要apikey的api调用功能
+"""
 import os
 import re
 import json
@@ -8,7 +11,7 @@ openai.api_key = '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'
 tts_api_key = '3c1c2c0822b56c92ceb5cd46d30e497c'
 bing_api_key = "d6fca707accf4a83a7afe9b3db0442bd"
 
-def chatgpt(prompt:str) -> str or None:
+def chatgpt(prompt:str) -> str:
     """
     使用OpenAI的GPT-3.5-turbo模型进行聊天。
 
@@ -32,11 +35,11 @@ def chatgpt(prompt:str) -> str or None:
 
     except Exception as e:
         print(f"An error occurred: {e}")
-        return None
+        return f"An error occurred: {e}"
 
-def instructgpt(prompt:str) -> str or None:
+def instructgpt(prompt:str) -> str:
     """
-    使用OpenAI的GPT-3.5-turbo-instruct模型进行聊天。
+    使用OpenAI的GPT-3.5-turbo-instruct模型。
 
     参数:
     prompt: 用户的输入消息。
@@ -56,9 +59,9 @@ def instructgpt(prompt:str) -> str or None:
 
     except Exception as e:
         print(f"An error occurred: {e}")
-        return None
+        return f"An error occurred: {e}"
 
-def embedding(things:list) -> list or None:
+def embedding(things:list) -> list or str:
     """
     使用OpenAI的text-embedding-ada-002模型获取输入词语的embedding。
 
@@ -82,7 +85,7 @@ def embedding(things:list) -> list or None:
 
     except Exception as e:
         print(f"An error occurred: {e}")
-        return None
+        return f"An error occurred: {e}"
 
 def genshin_tts(text:str, speaker:str) -> str:
     """
@@ -147,7 +150,7 @@ def bing_search(query: str, mkt: str = "zh-CN") -> list:
     mkt: str - 市场代码，默认为"zh-CN"
 
     返回:
-    search_result: 搜索结果的网页信息list，元素为url和概述的元组
+    search_results: 搜索结果的网页信息list，元素为url和概述的字典
     """
     try:
         url = "https://api.bing.microsoft.com/v7.0/search"
@@ -156,31 +159,42 @@ def bing_search(query: str, mkt: str = "zh-CN") -> list:
         }
         params = {
             "q": query,
-            "count": 1,
+            "count": 3,
             "mkt": mkt
         }
 
         response = requests.get(url, headers=headers, params=params)
         response = response.json()
         # 将搜索结果保存到一个临时JSON文件中
-        with open("temp.json", 'w', encoding='utf-8') as f:
+        with open("bing_temp.json", 'w', encoding='utf-8') as f:
             json.dump(response, f, ensure_ascii=False, indent=4)
 
         # 解析搜索结果
-        search_result = []
+        search_results = []
         page_values = response["webPages"]["value"]
         for value in page_values:
-            search_result.append((value["url"],value["snippet"]))
+            search_results.append(
+                {
+                    "url": value["url"],
+                    "summary": value["snippet"]
+                }
+            )
+
         if response.get("news"):
             news_values = response["news"]["value"]
             for value in news_values:
-                search_result.append((value["url"],value["description"]))
+                search_results.append(
+                    {
+                        "url": value["url"],
+                        "summary": value["description"]
+                    }
+                )
 
-        return search_result
+        return search_results
     except Exception as e:
         print(f"An error occurred: {e}")
         return f"An error occurred: {e}"
 
 if __name__ == "__main__":
-    search_result = bing_search("S13英雄联盟")
+    search_result = bing_search("知乎热榜")
     print(search_result)

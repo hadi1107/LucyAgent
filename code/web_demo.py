@@ -53,6 +53,7 @@ def chat(input, history):
     audio_file_path: 聊天机器人的响应音频文件路径
     """
     response = f"响应:{input}"  # 将用户的输入作为响应
+    # response = apis.chatgpt(input)  # 将用户的输入作为响应
     audio_file_path = apis.genshin_tts(text=response, speaker="银狼")  # 生成响应的音频
     history.append((input, response, audio_file_path))  # 将用户的输入、响应和音频路径添加到历史记录中
     conversations = []
