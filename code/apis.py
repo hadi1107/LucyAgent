@@ -166,7 +166,7 @@ def bing_search(query: str, mkt: str = "zh-CN") -> list:
         response = requests.get(url, headers=headers, params=params)
         response = response.json()
         # 将搜索结果保存到一个临时JSON文件中
-        with open("bing_temp.json", 'w', encoding='utf-8') as f:
+        with open("../resource/bing_temp.json", 'w', encoding='utf-8') as f:
             json.dump(response, f, ensure_ascii=False, indent=4)
 
         # 解析搜索结果

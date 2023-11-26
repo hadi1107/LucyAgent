@@ -9,11 +9,3 @@ class Perception:
     """代表智能代理的感知能力。当前未实现具体功能。"""
     def __init__(self):
         pass
-
-class Action:
-    """代表智能代理的行为能力。当前未实现具体功能。"""
-    def __init__(self):
-        pass
-
-
-

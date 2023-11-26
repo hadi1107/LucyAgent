@@ -119,7 +119,7 @@ def get_wikipedia_text(search_query:str, language='zh')->dict:
         # 解析页面内容响应数据
         content_data = content_response.json()
 
-        with open("wiki_temp.json","w",encoding="utf-8") as f:
+        with open("../resource/wiki_temp.json","w",encoding="utf-8") as f:
             json.dump(content_data, f, ensure_ascii=False, indent=4)
 
         pages = content_data['query']['pages']

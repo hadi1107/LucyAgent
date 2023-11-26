@@ -14,20 +14,20 @@ def chatgpt_function(prompt: str):
     chatgpt输出或function调用结果
     """
     functions = [
-        # {
-        #     "name": "play_wav",
-        #     "description": f"通过电脑音频播放\".wav\"音频",
-        #     "parameters": {
-        #         "type": "object",
-        #         "properties": {
-        #             "wave_file": {
-        #                 "type": "string",
-        #                 "description": "the audio file path",
-        #             }
-        #         },
-        #         "required": ["wave_file"],
-        #     }
-        # },
+        {
+            "name": "play_wav",
+            "description": f"通过电脑音频播放\".wav\"音频",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "wave_file": {
+                        "type": "string",
+                        "description": "the audio file path",
+                    }
+                },
+                "required": ["wave_file"],
+            }
+        },
         {
             "name": "web_search",
             "description": f"通过联网搜索获得时效性信息",
@@ -74,15 +74,15 @@ def chatgpt_function(prompt: str):
         arguments = json.loads(message["function_call"]["arguments"])
 
         # 播放本地音频
-        # if (function_name == "play_wav"):
-        #     try:
-        #         wave_file = arguments["wave_file"]
-        #         tools.play_wav(wave_file)
-        #         print(f"play_wav success,wave_file : {wave_file}")
-        #         return f"play_wav success,wave_file : {wave_file}"
-        #     except Exception as e:
-        #         print(f"An error occurred: {e}")
-        #         return f"An error occurred: {e}"
+        if (function_name == "play_wav"):
+            try:
+                wave_file = arguments["wave_file"]
+                tools.play_wav(wave_file)
+                print(f"play_wav success,wave_file : {wave_file}")
+                return f"play_wav success,wave_file : {wave_file}"
+            except Exception as e:
+                print(f"An error occurred: {e}")
+                return f"An error occurred: {e}"
 
         # 调用网络搜索
         if (function_name == "web_search"):
