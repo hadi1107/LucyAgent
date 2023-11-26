@@ -41,3 +41,29 @@ knowledge = {
 - 删除知识 (`del_knowledge`)：按索引删除知识或者清空所有知识。
 - 展示知识 (`show_knowledge`)：展示知识功能会列出所有知识文本和嵌入向量的大小。
 - 搜索知识 (`search_knowledge`)：通过计算查询文本的嵌入与知识库中每个知识的嵌入之间的相似度，搜索功能可以找到最匹配的知识。
+
+### 角色配置说明
+
+- `name`: 字符串类型，表示角色的姓名。
+
+- `seed_memory`: 字符串类型，提供了角色的背景故事，包括角色的身份、职责以及个人兴趣等信息。
+
+- `language_style`: 字符串类型，展示了角色独特的语言表达方式和个性。
+
+- `current_state`: 字符串类型，指示角色目前的活动或状态。
+
+- `basic_knowledge`: 数组类型，用于存储有关角色的基础知识，初始为一个空数组。
+
+- `memory_stream`: 数组类型，旨在捕捉角色记忆流的数据，初始为一个空数组。
+
+### 示例JSON
+```json
+{
+  "name": "角色名称",
+  "seed_memory": "角色背景故事描述",
+  "language_style": "角色语言风格描述",
+  "current_state": "角色当前状态描述",
+  "basic_knowledge": [],
+  "memory_stream": []
+}
+```

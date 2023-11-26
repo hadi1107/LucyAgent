@@ -2,6 +2,9 @@ import time
 import json
 import numpy as np
 import apis  # 用于与外部API进行交互。
+
+MEMORY_LIMIT = 10
+
 def cosine_similarity(embedding1, embedding2):
     """计算两个嵌入向量之间的余弦相似度。"""
     dot_product = np.dot(embedding1, embedding2)
@@ -26,7 +29,7 @@ class Brain:
         self.current_state = current_state
         self.basic_knowledge = basic_knowledge
         self.memory_stream = memory_stream
-        self.memory_limit = 10
+        self.memory_limit = MEMORY_LIMIT
 
     def to_json(self):
         """将大脑的状态转换为JSON格式的字典。"""
@@ -47,14 +50,15 @@ class Brain:
     def create_memory(self, input, output):
         """根据输入和输出创建一个记忆摘要，并返回记忆字典。"""
         summary_prompt = f"""
-你是{self.name}。{self.seed_memory}
-下方的分隔符<<<和>>>包含的内容为一段你参与的事件的文本描述。
-要求：现在你要从事件中总结你获得了什么信息，进行了什么行为，以你的视角返回陈述性的总结(100字以内)。
-限制：不要修改事件的内容，仅输出陈述性的总结，严禁输出任何额外内容。
-<<<
-你接受的相关信息输入是：{input}
-你做出的相关行为输出是：{output}
->>>
+你的名称：{self.name}
+你的初始记忆：{self.seed_memory}
+事件描述：你刚刚参与了一些事件，需要添加到你的记忆流里。下方的<<<和>>>之间是一段描述你参与的事件的文本。
+任务要求：基于事件内容，总结你从中获得的信息和你采取的行为。以第一人称视角提供一个简洁、陈述性的总结，字数不超过100字。
+约束条件：不要修改事件的实际内容，只提供总结，不包含任何额外信息。
+事件开始<<<
+输入信息：{input}
+行为输出：{output}
+事件结束>>>
 """
         summary = apis.chatgpt(summary_prompt)  # 假设这个函数调用返回一个字符串摘要。
         embedding_list = apis.embedding(summary)  # 假设这个函数调用返回一个嵌入向量。
@@ -96,13 +100,14 @@ class Brain:
 
         # 创建总结记忆并将其添加到记忆流
         summary_prompt = f"""
-你是{self.name}。{self.seed_memory}
-下方的分隔符<<<和>>>包含的内容为你此时的记忆切片，包含几个相似的记忆描述。
-要求：现在你要反思相关记忆，从中提取关键信息，输出语义层面更高级的总结，以你的视角返回陈述性的总结(100字以内)。
-限制：不要修改记忆的内容，仅输出陈述性的总结，严禁输出任何额外内容。
-<<<
-几个相似的记忆描述：{descriptions_to_summarize}
->>>
+你的名称：{self.name}
+你的初始记忆：{self.seed_memory}
+记忆总结任务：你将会看到一系列相似的记忆描述，它们在下方的分隔符<<<和>>>之间呈现。
+任务要求：反思这些记忆，并从中提取关键信息。以第一人称视角编写一个语义层面更高级的总结，长度控制在100字以内。
+约束条件：不要改变原始记忆的内容，只提供陈述性的总结。不要包含任何额外的信息或评论。
+记忆描述开始<<<
+{descriptions_to_summarize}
+记忆描述结束>>>
         """
         print(summary_prompt)
         summary = apis.chatgpt(summary_prompt)  # 假设这个函数调用返回一个字符串摘要。
@@ -190,14 +195,16 @@ class Brain:
         return None
 
     def extract_knowledge(self,source):
+        """从包含知识的文本中提取知识"""
         summary_prompt = f"""
-你是{self.name}。{self.seed_memory}
-下方的分隔符<<<和>>>包含的内容为一段包含知识点的文本。
-要求：现在你要阅读相关文本，忽略不必要的缩进和编码问题，然后陈述性地，准确地总结其中的知识点(100字以内)。
-限制：不要修改知识点的内容，仅输出知识点的总结，严禁输出任何额外内容。
-<<<
-包含知识点的文本：{source}
->>>
+你的名称：{self.name}
+你的初始记忆：{self.seed_memory}
+知识总结任务：你正在提取知识，下方的分隔符<<<和>>>之间的文本包含了需要被总结的知识点。
+任务要求：阅读和理解文本内容，忽略任何不必要的缩进和编码问题。提供一个准确的、陈述性的知识点总结，长度限制在100字以内。
+约束条件：不要改变知识点的原始内容，只提供总结。不要添加任何额外的信息。
+知识点文本开始<<<
+{source}
+知识点文本结束>>>
 """
         summary = apis.chatgpt(summary_prompt)
         return summary
@@ -229,7 +236,7 @@ class Brain:
         if not self.basic_knowledge:
             print("没有知识")
             return
-        print(f"知识条数：{len(self.memory_stream)}")
+        print(f"知识条数：{len(self.basic_knowledge)}")
         for knowledge in self.basic_knowledge:
             text = knowledge["text"]
             embedding = knowledge["embedding"]
@@ -256,6 +263,28 @@ class Brain:
                 most_similar_knowledge = knowledge
 
         return most_similar_knowledge
+
+    def chat(self,input,history):
+        if history is None:
+            history = []
+        history.append(f"hadi:{input}")
+        memory = self.search_memory(input)
+        knowledge = self.search_knowledge(input)
+        prompt = f'''
+你的名称：{self.name}
+你的初始记忆：{self.seed_memory}
+你的当前状态：{self.current_state}
+对话任务：你正在进行对话，下方的分隔符<<<和>>>之间的文本包含了对话的上下文。
+任务要求：你正在作为{self.name}进行回复。你的语言风格的示例是：{self.language_style}。回复长度限制在100字以内。
+约束条件：不要扮演其他角色，不要刻意重复你的语言风格，只作为{self.name}回复。不要添加任何额外的信息和格式。
+辅助信息：你从记忆流中检索到了相关记忆，{memory["description"]},你从你的知识库中检索到了相关知识：{knowledge["text"]}
+上下文开始<<<
+{history}
+上下文结束>>>
+'''
+        response = apis.chatgpt(prompt)
+        history.append(f"胡桃:{response}")
+        return response,history
 
 if __name__ == "__main__":
     # 加载存储在JSON文件中的大脑状态。

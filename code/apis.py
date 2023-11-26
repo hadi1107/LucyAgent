@@ -61,7 +61,7 @@ def instructgpt(prompt:str) -> str:
         print(f"An error occurred: {e}")
         return f"An error occurred: {e}"
 
-def embedding(things:list) -> list or str:
+def embedding(things:list or str) -> list:
     """
     使用OpenAI的text-embedding-ada-002模型获取输入词语的embedding。
 
