@@ -268,6 +268,9 @@ class Brain:
         if history is None:
             history = []
         history.append(f"hadi:{input}")
+        context = ""
+        for chat in history:
+            context = context + chat + "\n"
         memory = self.search_memory(input)
         knowledge = self.search_knowledge(input)
         prompt = f'''
@@ -275,15 +278,18 @@ class Brain:
 你的初始记忆：{self.seed_memory}
 你的当前状态：{self.current_state}
 对话任务：你正在进行对话，下方的分隔符<<<和>>>之间的文本包含了对话的上下文。
-任务要求：你正在作为{self.name}进行回复。你的语言风格的示例是：{self.language_style}。回复长度限制在100字以内。
-约束条件：不要扮演其他角色，不要刻意重复你的语言风格，只作为{self.name}回复。不要添加任何额外的信息和格式。
-辅助信息：你从记忆流中检索到了相关记忆，{memory["description"]},你从你的知识库中检索到了相关知识：{knowledge["text"]}
+任务要求：你正在作为{self.name}进行回复。回复长度限制在100字以内。
+约束条件：不要扮演其他角色，只作为{self.name}回复。不要添加任何额外的信息和格式。
+辅助信息：你从记忆流中检索到了相关记忆”“”{memory["description"]}“”“你从你的知识库中检索到了相关知识：”“”{knowledge["text"]}“”“
 上下文开始<<<
-{history}
+{self.language_style}
+{context}
 上下文结束>>>
 '''
+        print(prompt)
         response = apis.chatgpt(prompt)
-        history.append(f"胡桃:{response}")
+        print(response)
+        history.append(f"{response}")
         return response,history
 
 if __name__ == "__main__":
@@ -319,6 +325,13 @@ if __name__ == "__main__":
     # 打印状态
     hutao.brain.show_memory()
     hutao.brain.show_knowledge()
+
+    # history = []
+    # while True:
+    #     text = input("hadi:")
+    #     if text == '0':
+    #         break
+    #     hutao.brain.chat(text,history)
 
     # 将更新后的大脑状态保存到JSON文件中。
     try:
