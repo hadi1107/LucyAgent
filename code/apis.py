@@ -116,7 +116,7 @@ def genshin_tts(text:str, speaker:str) -> str:
             print("Message: ", response_data["message"])
 
             # 创建音频文件夹
-            audio_folder = "../resource/audio_files"
+            audio_folder = "../resource/audios"
             if not os.path.exists(audio_folder):
                 os.makedirs(audio_folder)
 

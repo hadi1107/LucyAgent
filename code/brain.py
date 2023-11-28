@@ -15,11 +15,11 @@ def cosine_similarity(embedding1, embedding2):
 
 class LucyAgent:
     """代表一个具有感知、大脑和行为能力的智能代理。"""
-    def __init__(self, perception, brain, action):
+    def __init__(self, perception, brain, action, fsm):
         self.perception = perception
         self.brain = brain
         self.action = action
-
+        self.fsm = fsm
 
 class Brain:
     """代表智能代理的大脑，负责记忆和知识处理。"""
@@ -367,7 +367,7 @@ if __name__ == "__main__":
         print("未找到指定的文件。")
         exit()
 
-    hutao = LucyAgent(perception=None, brain=Brain.from_json(loaded_data), action=None)
+    hutao = LucyAgent(perception=None, brain=Brain.from_json(loaded_data), action=None, fsm = None)
 
     # 测试知识相关功能
     # text = "璃月，提瓦特大陆七国中的一国，位于大陆东方的富饶国度。其商港璃月港是全提瓦特大陆最繁华且吞吐量最大的港口"
@@ -391,13 +391,16 @@ if __name__ == "__main__":
     # 打印状态
     hutao.brain.show_memory()
     hutao.brain.show_knowledge()
+
     # history = None
     # hutao.brain.chat("胡桃可以给我来一杯咖啡吗？",history)
+    # 结果：
     # 胡桃: 当然可以！请问您喜欢什么口味的咖啡呢？我们这里有各种不同的选择。
 
 
     history = None
     hutao.brain.cot_chat("胡桃可以给我来一杯咖啡吗？",history)
+    # 结果：
     # 我在思考对方的请求是否合适。作为往生堂的堂主，我应该保持礼貌并尽力帮助他人。但是，作为一名读书人，我也需要专注于我的学习。
     # 或许我可以告诉他我正在读书，并询问他是否还需要其他帮助。这样既能满足他的需求，也不会打断我的学习。
     # 胡桃: 哈迪，你好！很抱歉，我现在正在读书，可能无法立即为你泡咖啡。不过我可以告诉你，我在往生堂经营一家咖啡店，提供一些饮品和小食。如果你还需要其他帮助，我会尽力满足你的需求。

@@ -1,5 +1,4 @@
 import gradio as gr
-import apis
 import json
 from brain import LucyAgent
 from brain import Brain
@@ -63,10 +62,10 @@ def mypredict(input, history=None):
     save_to_file("../resource/conversations.json",history)
 
     # 指定默认显示的图片路径
-    default_image_path = "../resource/hutaoyao.webp"
+    default_image_path = "../resource/pictures/hutao_default.webp"
 
     # 生成响应的音频
-    default_audio_path = "../resource/audio_files/这是一段测试音频哟.wav"
+    default_audio_path = "../resource/audios/这是一段测试音频哟.wav"
     # audio_file_path = apis.genshin_tts(text=response.lstrip("胡桃:"), speaker="胡桃")
     audio_file_path = default_audio_path
 
