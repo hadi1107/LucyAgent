@@ -20,6 +20,7 @@ class LucyAgent:
         self.brain = brain
         self.action = action
 
+
 class Brain:
     """代表智能代理的大脑，负责记忆和知识处理。"""
     def __init__(self, name, seed_memory, language_style, basic_knowledge, current_state, memory_stream):
@@ -46,6 +47,18 @@ class Brain:
     def from_json(cls, json_data):
         """从JSON格式的数据创建Brain实例。"""
         return cls(**json_data)
+
+    def show_info(self):
+        # 创建一个描述大脑状态的字符串
+        info = f"Brain Info:\n"
+        info += f"Name: {self.name}\n"
+        info += f"Seed Memory: {self.seed_memory}\n"
+        info += f"Language Style: \n{self.language_style}\n"
+        info += f"Memory Limit: {self.memory_limit}\n"
+        info += f"Current State: {self.current_state}\n"
+        info += self.show_knowledge()
+        info += self.show_memory()
+        return info
 
     def create_memory(self, input, output):
         """根据输入和输出创建一个记忆摘要，并返回记忆字典。"""
@@ -159,10 +172,12 @@ class Brain:
 
     def show_memory(self):
         """展示所有记忆的摘要、创建时间和嵌入向量的大小。"""
+        memory_str = ""
         if not self.memory_stream:
             print("没有记忆")
             return
         print(f"记忆条数：{len(self.memory_stream)}")
+        memory_str = memory_str + f"记忆条数：{len(self.memory_stream)}\n"
         for memory in self.memory_stream:
             description = memory["description"]
             create_time = memory["create_time"]
@@ -170,6 +185,9 @@ class Brain:
             print("---------------------------------------")
             print(f"记忆描述: {description}\n创建时间: {create_time}\n嵌入向量大小: {len(embedding)}")
             print("---------------------------------------")
+            memory_str = memory_str + f"记忆描述: {description}\n创建时间: {create_time}\n嵌入向量大小: {len(embedding)}\n"
+
+        return memory_str
 
     def search_memory(self, query_text):
         """搜索记忆的方法，只返回最相似的一个记忆项"""
@@ -233,16 +251,21 @@ class Brain:
 
     def show_knowledge(self):
         """展示所有知识。"""
+        knowledge_str = ""
         if not self.basic_knowledge:
             print("没有知识")
             return
         print(f"知识条数：{len(self.basic_knowledge)}")
+        knowledge_str = knowledge_str + f"知识条数：{len(self.basic_knowledge)}\n"
         for knowledge in self.basic_knowledge:
             text = knowledge["text"]
             embedding = knowledge["embedding"]
             print("---------------------------------------")
             print(f"知识描述: {text}\n嵌入向量大小: {len(embedding)}")
             print("---------------------------------------")
+            knowledge_str = knowledge_str + f"知识描述: {text}\n嵌入向量大小: {len(embedding)}\n"
+
+        return knowledge_str
 
     def search_knowledge(self, query_text):
         """搜索知识的方法，只返回最相似的一个知识项"""
@@ -292,6 +315,49 @@ class Brain:
         history.append(f"{response}")
         return response,history
 
+    def cot_chat(self,input,history):
+        if history is None:
+            history = []
+        history.append(f"hadi:{input}")
+        context = ""
+        for chat in history:
+            context = context + chat + "\n"
+        memory = self.search_memory(input)
+        knowledge = self.search_knowledge(input)
+        prompt = f'''
+你的名称：{self.name}
+你的初始记忆：{self.seed_memory}
+你的当前状态：{self.current_state}
+对话任务：你正在对一段对话进行思考，下方的分隔符<<<和>>>之间的文本包含了对话的上下文。
+任务要求：你正在作为{self.name}进行思考。思考出的内容用第一人称返回，长度限制在100字以内。
+约束条件：仅仅返回思考出的内容。不要添加任何额外的信息和格式。
+辅助信息：你从记忆流中检索到了相关记忆:”“”{memory["description"]}“”“你从你的知识库中检索到了相关知识:”“”{knowledge["text"]}“”“
+上下文开始<<<
+{self.language_style}
+{context}
+上下文结束>>>
+'''
+        print(prompt)
+        response = apis.chatgpt(prompt)
+        print(response)
+        prompt = f'''
+你的名称：{self.name}
+你的初始记忆：{self.seed_memory}
+你的当前状态：{self.current_state}
+对话任务：你正在进行对话，下方的分隔符<<<和>>>之间的文本包含了对话的上下文。
+任务要求：你正在作为{self.name}进行回复。回复长度限制在100字以内。
+约束条件：不要扮演其他角色，只作为{self.name}回复。不要添加任何额外的信息和格式。
+辅助信息：你进行了一些思考,你的回复要建立在这些思考的基础之上:"""{response}"""
+上下文开始<<<
+{self.language_style}
+{context}
+上下文结束>>>
+'''
+        response = apis.chatgpt(prompt)
+        print(response)
+        history.append(f"{response}")
+        return response,history
+
 if __name__ == "__main__":
     # 加载存储在JSON文件中的大脑状态。
     try:
@@ -325,6 +391,16 @@ if __name__ == "__main__":
     # 打印状态
     hutao.brain.show_memory()
     hutao.brain.show_knowledge()
+    # history = None
+    # hutao.brain.chat("胡桃可以给我来一杯咖啡吗？",history)
+    # 胡桃: 当然可以！请问您喜欢什么口味的咖啡呢？我们这里有各种不同的选择。
+
+
+    history = None
+    hutao.brain.cot_chat("胡桃可以给我来一杯咖啡吗？",history)
+    # 我在思考对方的请求是否合适。作为往生堂的堂主，我应该保持礼貌并尽力帮助他人。但是，作为一名读书人，我也需要专注于我的学习。
+    # 或许我可以告诉他我正在读书，并询问他是否还需要其他帮助。这样既能满足他的需求，也不会打断我的学习。
+    # 胡桃: 哈迪，你好！很抱歉，我现在正在读书，可能无法立即为你泡咖啡。不过我可以告诉你，我在往生堂经营一家咖啡店，提供一些饮品和小食。如果你还需要其他帮助，我会尽力满足你的需求。
 
     # history = []
     # while True:

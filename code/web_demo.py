@@ -1,7 +1,7 @@
 import gradio as gr
 import apis
 import json
-from lucy_agent import LucyAgent
+from brain import LucyAgent
 from brain import Brain
 
 def save_to_file(file_path:str, conversations)-> None:
@@ -56,14 +56,21 @@ def mypredict(input, history=None):
         history = []
     # 调用hutao.brain.chat函数获取响应和更新后的历史记录
     response, history = hutao.brain.chat(input, history)
-    # 生成响应的音频
-    audio_file_path = apis.genshin_tts(text=response.lstrip("胡桃:"), speaker="胡桃")
     history_text = ""  # 初始化历史记录文本
     for chat in history:  # 遍历历史记录
         history_text = history_text + chat + "\n"
 
     save_to_file("../resource/conversations.json",history)
-    return history_text, audio_file_path  # 返回历史记录文本和音频文件路径
+
+    # 指定默认显示的图片路径
+    default_image_path = "../resource/hutaoyao.webp"
+
+    # 生成响应的音频
+    default_audio_path = "../resource/audio_files/这是一段测试音频哟.wav"
+    # audio_file_path = apis.genshin_tts(text=response.lstrip("胡桃:"), speaker="胡桃")
+    audio_file_path = default_audio_path
+
+    return history_text, audio_file_path, default_image_path  # 返回历史记录文本和音频文件路径
 
 if __name__ == "__main__":
     try:
@@ -91,21 +98,34 @@ if __name__ == "__main__":
         # 创建一个状态对象，用于存储历史记录
         state = gr.State([])
 
-        # 创建一个用于显示历史记录的文本框
-        history_box = gr.Textbox(lines=10, label="对话记录")
+        with gr.Tab("Talk with Hutao"):
+            with gr.Row():
+                with gr.Column():
+                    # 创建一个用于显示历史记录的文本框
+                    history_box = gr.Textbox(lines=10, label="对话记录")
+                    # 创建一个文本框，用于输入文本
+                    txt = gr.Textbox(show_label=False, placeholder="输入文本")
 
-        # 创建一个音频播放器
-        audio_box = gr.Audio()
+                with gr.Column():
+                    # 创建一个音频播放器
+                    audio_box = gr.Audio()
+                    # 创建 Image 组件并设置默认图片
+                    image_box = gr.Image(height = 200)
 
-        # 创建一个文本框，用于输入文本
-        txt = gr.Textbox(show_label=False, placeholder="输入文本")
+            # 创建一个按钮，当按钮被点击时，调用 mypredict 函数，并将文本框的内容和状态对象作为参数，将历史记录文本框和音频播放器作为输出
+            button = gr.Button("发送 \U0001F600")
+            button.click(mypredict, [txt, state], [history_box, audio_box, image_box])
 
-        # 创建一个按钮，当按钮被点击时，调用 mypredict 函数，并将文本框的内容和状态对象作为参数，将历史记录文本框和音频播放器作为输出
-        button = gr.Button("发送 \U0001F600")
-        button.click(mypredict, [txt, state], [history_box, audio_box])
+        # # 加载预制prompt
+        # keys = load_prompts('../resource/key_prompt.json').keys()  # 获取所有的key
+        # iface = gr.Interface(display_prompt, gr.Dropdown(keys, label="prompt功能"), gr.Textbox( label="通用prompt",show_copy_button = True),allow_flagging="never")
 
-        # 加载预制prompt
-        keys = load_prompts('../resource/key_prompt.json').keys()  # 获取所有的key
-        iface = gr.Interface(display_prompt, gr.Dropdown(keys, label="prompt功能"), gr.Textbox( label="通用prompt",show_copy_button = True),allow_flagging="never")
+        with gr.Tab("Observe Hutao"):
+            agent_state = gr.Textbox()
+            button = gr.Button("查询 \U0001F600")
+            def show_hutao_state():
+                state = hutao.brain.show_info()
+                return state
+            button.click(show_hutao_state ,inputs=[], outputs=agent_state)
 
     demo.queue().launch()
