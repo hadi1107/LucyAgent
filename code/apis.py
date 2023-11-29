@@ -133,7 +133,7 @@ def genshin_tts(text:str, speaker:str) -> str:
             with open(audio_file_path, 'wb') as f:
                 f.write(response.content)
 
-            # 返回音频文件
+            # 返回音频文件路径
             return audio_file_path
         else:
             print("Error: ", response.status_code)
@@ -196,6 +196,4 @@ def bing_search(query: str, mkt: str = "zh-CN") -> list:
         print(f"An error occurred: {e}")
         return f"An error occurred: {e}"
 
-if __name__ == "__main__":
-    search_result = bing_search("知乎热榜")
-    print(search_result)
+

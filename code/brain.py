@@ -2,6 +2,7 @@ import time
 import json
 import numpy as np
 import apis  # 用于与外部API进行交互。
+from agent_fsm import AgentFSM
 
 MEMORY_LIMIT = 10
 
@@ -15,22 +16,25 @@ def cosine_similarity(embedding1, embedding2):
 
 class LucyAgent:
     """代表一个具有感知、大脑和行为能力的智能代理。"""
-    def __init__(self, perception, brain, action, fsm):
+    def __init__(self, perception, brain, action):
         self.perception = perception
         self.brain = brain
         self.action = action
-        self.fsm = fsm
 
 class Brain:
     """代表智能代理的大脑，负责记忆和知识处理。"""
-    def __init__(self, name, seed_memory, language_style, basic_knowledge, current_state, memory_stream):
+    def __init__(self, name, seed_memory, language_style, basic_knowledge, memory_stream, mood_list, emoji_list):
         self.name = name
         self.seed_memory = seed_memory
         self.language_style = language_style
-        self.current_state = current_state
         self.basic_knowledge = basic_knowledge
+
         self.memory_stream = memory_stream
         self.memory_limit = MEMORY_LIMIT
+
+        self.mood_list = mood_list
+        self.emoji_list = emoji_list
+        self.fsm = AgentFSM("开心",mood_list,emoji_list)
 
     def to_json(self):
         """将大脑的状态转换为JSON格式的字典。"""
@@ -38,9 +42,10 @@ class Brain:
             "name": self.name,
             "seed_memory": self.seed_memory,
             "language_style": self.language_style,
-            "current_state": self.current_state,
             "basic_knowledge": self.basic_knowledge,
-            "memory_stream": self.memory_stream
+            "memory_stream": self.memory_stream,
+            "mood_list":self.mood_list,
+            "emoji_list": self.emoji_list
         }
 
     @classmethod
@@ -55,7 +60,9 @@ class Brain:
         info += f"Seed Memory: {self.seed_memory}\n"
         info += f"Language Style: \n{self.language_style}\n"
         info += f"Memory Limit: {self.memory_limit}\n"
-        info += f"Current State: {self.current_state}\n"
+        info += f"mood_list: {self.mood_list}\n"
+        info += f"emoji_list: {self.emoji_list}\n"
+        info += f"mood: {self.fsm.mood}\n"
         info += self.show_knowledge()
         info += self.show_memory()
         return info
@@ -298,7 +305,7 @@ class Brain:
         prompt = f'''
 你的名称：{self.name}
 你的初始记忆：{self.seed_memory}
-你的当前状态：{self.current_state}
+你的当前心情：{self.fsm.mood}
 对话任务：你正在进行对话，下方的分隔符<<<和>>>之间的文本包含了对话的上下文。
 任务要求：你正在作为{self.name}进行回复。回复长度限制在100字以内。
 约束条件：不要扮演其他角色，只作为{self.name}回复。不要添加任何额外的信息和格式。
@@ -318,7 +325,7 @@ class Brain:
         prompt = f'''
 你的名称：{self.name}
 你的初始记忆：{self.seed_memory}
-你的当前状态：{self.current_state}
+你的当前心情：{self.fsm.mood}
 对话任务：你正在对一段对话进行内心中的思考，下方的分隔符<<<和>>>之间的文本包含了对话的上下文。
 任务要求：你正在作为{self.name}进行思考。思考出的内容用第一人称返回，长度限制在100字以内。
 约束条件：仅仅返回思考出的内容。不要添加任何额外的信息和格式。
@@ -350,7 +357,7 @@ class Brain:
         prompt = f'''
 你的名称：{self.name}
 你的初始记忆：{self.seed_memory}
-你的当前状态：{self.current_state}
+你的当前心情：{self.fsm.mood}
 对话任务：你正在进行对话，下方的分隔符<<<和>>>之间的文本包含了对话的上下文。
 任务要求：你正在作为{self.name}进行回复。回复长度限制在100字以内。
 约束条件：不要扮演其他角色，只作为{self.name}回复。不要添加任何额外的信息和格式。
@@ -375,11 +382,10 @@ if __name__ == "__main__":
         print("未找到指定的文件。")
         exit()
 
-    hutao = LucyAgent(perception=None, brain=Brain.from_json(loaded_data), action=None, fsm = None)
+    hutao = LucyAgent(perception=None, brain=Brain.from_json(loaded_data), action=None)
 
     # 打印状态
-    hutao.brain.show_memory()
-    hutao.brain.show_knowledge()
+    hutao.brain.show_info()
 
     # history = None
     # hutao.brain.chat("胡桃可以给我来一杯咖啡吗？",history)
