@@ -4,6 +4,7 @@ import time
 from brain import LucyAgent
 from brain import Brain
 from agent_fsm import AgentFSM
+
 def save_to_file(file_path:str, conversations)-> None:
     """
     用于将对话列表保存到文件中
@@ -55,19 +56,14 @@ def mypredict(input, history=None):
     if history is None:  # 如果历史记录为空，则初始化为空列表
         history = []
     # 调用hutao.brain.chat函数获取响应和更新后的历史记录
-    response, history = hutao.brain.chat(input, history)
+    response, history, thought = hutao.brain.cot_chat(input, history)
     history_text = ""  # 初始化历史记录文本
     for chat in history:  # 遍历历史记录
         history_text = history_text + chat + "\n"
 
     save_to_file("../resource/conversations.json",history)
 
-    # 指定默认显示的图片路径
-    default_image_path = "../resource/pictures/hutao_default.webp"
-    # image_path = hutao.fsm.get_current_emoji()
-    time.sleep(30)
-    thought = hutao.brain.create_thought(input, history_text)
-    hutao.fsm.mood_transition(f"询问：{input}", thought)
+    hutao.fsm.mood_transition(f"收到询问：{input}", thought)
     image_path = hutao.fsm.get_current_emoji()
     # 生成响应的音频
     default_audio_path = "../resource/audios/这是一段测试音频哟.wav"
@@ -97,15 +93,15 @@ if __name__ == "__main__":
             with gr.Row():
                 with gr.Column():
                     # 创建一个用于显示历史记录的文本框
-                    history_box = gr.Textbox(lines=10, label="对话记录")
+                    history_box = gr.Textbox(lines=10, label="Talk history")
                     # 创建一个文本框，用于输入文本
-                    txt = gr.Textbox(show_label=False, placeholder="输入文本")
+                    txt = gr.Textbox(show_label=False, placeholder="Input text")
 
                 with gr.Column():
                     # 创建一个音频播放器
-                    audio_box = gr.Audio()
+                    audio_box = gr.Audio(label = "Hutao's audio")
                     # 创建 Image 组件并设置默认图片
-                    image_box = gr.Image(height = 200)
+                    image_box = gr.Image(label="Hutao's mood",height = 200)
 
             # 创建一个按钮，当按钮被点击时，调用 mypredict 函数，并将文本框的内容和状态对象作为参数，将历史记录文本框和音频播放器作为输出
             button = gr.Button("发送 \U0001F600")
@@ -116,11 +112,14 @@ if __name__ == "__main__":
         # iface = gr.Interface(display_prompt, gr.Dropdown(keys, label="prompt功能"), gr.Textbox( label="通用prompt",show_copy_button = True),allow_flagging="never")
 
         with gr.Tab("Observe Hutao"):
-            agent_state = gr.Textbox()
+            agent_state = gr.Textbox(label="Hutao's state")
             button = gr.Button("查询 \U0001F600")
             def show_hutao_state():
-                state = hutao.brain.show_info()
-                return state
+                info = hutao.brain.show_info()
+                info += f"\nFSM Info:\n"
+                info += f"Mood:{hutao.fsm.mood}\n"
+                return info
+
             button.click(show_hutao_state ,inputs=[], outputs=agent_state)
 
     demo.queue().launch()

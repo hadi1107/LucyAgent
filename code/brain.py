@@ -10,7 +10,7 @@ def cosine_similarity(embedding1, embedding2):
     dot_product = np.dot(embedding1, embedding2)
     norm1 = np.linalg.norm(embedding1)
     norm2 = np.linalg.norm(embedding2)
-    print(dot_product / (norm1 * norm2))
+    print(f"cosine_similarity:{dot_product / (norm1 * norm2)}")
     return dot_product / (norm1 * norm2)
 
 class LucyAgent:
@@ -155,7 +155,8 @@ class Brain:
         elif mode == "search":
             if query:
                 # 搜索匹配的记忆
-                memory = self.search_memory(query)
+                query_embedding = apis.embedding(query)[0]
+                memory = self.search_memory(query_embedding)
                 if memory:
                     # 如果找到匹配的记忆，从记忆流中删除
                     try:
@@ -189,12 +190,9 @@ class Brain:
 
         return memory_str
 
-    def search_memory(self, query_text):
+    def search_memory(self, query_embedding):
         """搜索记忆的方法，只返回最相似的一个记忆项"""
         if self.memory_stream:
-            # 计算查询文本的嵌入
-            query_embedding = apis.embedding(query_text)[0]
-
             # 初始化最高相似度和相应的记忆项
             max_similarity = -1
             most_similar_memory = None
@@ -267,11 +265,8 @@ class Brain:
 
         return knowledge_str
 
-    def search_knowledge(self, query_text):
+    def search_knowledge(self, query_embedding):
         """搜索知识的方法，只返回最相似的一个知识项"""
-        # 计算查询文本的嵌入
-        query_embedding = apis.embedding(query_text)[0]
-
         # 初始化最高相似度和相应的知识项
         max_similarity = -1
         most_similar_knowledge = None
@@ -288,14 +283,18 @@ class Brain:
         return most_similar_knowledge
 
     def chat(self, input, history):
+        query_embedding = apis.embedding(input)[0]
+
         if history is None:
             history = []
         history.append(f"hadi:{input}")
         context = ""
         for chat in history:
             context = context + chat + "\n"
-        memory = self.search_memory(input)
-        knowledge = self.search_knowledge(input)
+
+        memory = self.search_memory(query_embedding)
+        knowledge = self.search_knowledge(query_embedding)
+
         prompt = f'''
 你的名称：{self.name}
 你的初始记忆：{self.seed_memory}
@@ -315,9 +314,7 @@ class Brain:
         history.append(f"{response}")
         return response, history
 
-    def create_thought(self, input, context):
-        memory = self.search_memory(input)
-        knowledge = self.search_knowledge(input)
+    def create_thought(self, memory, knowledge, context):
         prompt = f'''
 你的名称：{self.name}
 你的初始记忆：{self.seed_memory}
@@ -337,13 +334,19 @@ class Brain:
         return thought
 
     def cot_chat(self, input, history):
+        query_embedding = apis.embedding(input)[0]
+
         if history is None:
             history = []
         history.append(f"hadi:{input}")
         context = ""
         for chat in history:
             context = context + chat + "\n"
-        thought = self.create_thought(input, context)
+
+        memory = self.search_memory(query_embedding)
+        knowledge = self.search_knowledge(query_embedding)
+        thought = self.create_thought(memory, knowledge, context)
+
         prompt = f'''
 你的名称：{self.name}
 你的初始记忆：{self.seed_memory}
@@ -361,7 +364,7 @@ class Brain:
         response = apis.chatgpt(prompt)
         print(response)
         history.append(f"{response}")
-        return response, history
+        return response, history, thought
 
 if __name__ == "__main__":
     # 加载存储在JSON文件中的大脑状态。
@@ -373,25 +376,6 @@ if __name__ == "__main__":
         exit()
 
     hutao = LucyAgent(perception=None, brain=Brain.from_json(loaded_data), action=None, fsm = None)
-
-    # 测试知识相关功能
-    # text = "璃月，提瓦特大陆七国中的一国，位于大陆东方的富饶国度。其商港璃月港是全提瓦特大陆最繁华且吞吐量最大的港口"
-    # hutao.brain.add_knowledge(text)
-    # knowledge = hutao.brain.search_knowledge("绝区零二测情况怎么说？")
-    # print(knowledge["text"])
-
-    # query = "绝区零"
-    # wiki_object = tools.get_wikipedia_text(query)  # 假设这个函数调用返回查询的响应。
-    # print(wiki_object)
-    # summary = hutao.brain.extract_knowledge(wiki_object)
-    # hutao.brain.add_knowledge(summary)
-
-    # memory = hutao.brain.create_memory("你好","你好，我是胡桃，要喝点什么吗？")
-    # hutao.brain.add_memory(memory)
-    # memory = hutao.brain.create_memory("你知道璃月吗？", "璃月，提瓦特大陆七国中的一国，位于大陆东方的富饶国度。其商港璃月港是全提瓦特大陆最繁华且吞吐量最大的港口")
-    # hutao.brain.add_memory(memory)
-
-    # hutao.brain.del_memory(mode="search",query="无关紧要的事")
 
     # 打印状态
     hutao.brain.show_memory()
@@ -409,13 +393,6 @@ if __name__ == "__main__":
     # 我在思考对方的请求是否合适。作为往生堂的堂主，我应该保持礼貌并尽力帮助他人。但是，作为一名读书人，我也需要专注于我的学习。
     # 或许我可以告诉他我正在读书，并询问他是否还需要其他帮助。这样既能满足他的需求，也不会打断我的学习。
     # 胡桃: 哈迪，你好！很抱歉，我现在正在读书，可能无法立即为你泡咖啡。不过我可以告诉你，我在往生堂经营一家咖啡店，提供一些饮品和小食。如果你还需要其他帮助，我会尽力满足你的需求。
-
-    # history = []
-    # while True:
-    #     text = input("hadi:")
-    #     if text == '0':
-    #         break
-    #     hutao.brain.chat(text,history)
 
     # 将更新后的大脑状态保存到JSON文件中。
     try:

@@ -28,7 +28,7 @@ class AgentFSM:
         prompt = f"""
 你现在要驱动角色状态的转换。
 角色当前状态:{self.mood}
-角色观察到的事件是{trigger}
+角色观察到的事件是:{trigger}
 角色的想法是：{thought}
 可能的状态有:{self.mood_list}
 根据当前状态和可能的状态返回下一个状态，内容为状态的字符串，比如<<<{self.mood_list[0]}>>>。不要进行任何额外输出。
