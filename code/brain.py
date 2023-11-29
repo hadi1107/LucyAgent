@@ -287,7 +287,7 @@ class Brain:
 
         return most_similar_knowledge
 
-    def chat(self,input,history):
+    def chat(self, input, history):
         if history is None:
             history = []
         history.append(f"hadi:{input}")
@@ -313,22 +313,16 @@ class Brain:
         response = apis.chatgpt(prompt)
         print(response)
         history.append(f"{response}")
-        return response,history
+        return response, history
 
-    def cot_chat(self,input,history):
-        if history is None:
-            history = []
-        history.append(f"hadi:{input}")
-        context = ""
-        for chat in history:
-            context = context + chat + "\n"
+    def create_thought(self, input, context):
         memory = self.search_memory(input)
         knowledge = self.search_knowledge(input)
         prompt = f'''
 你的名称：{self.name}
 你的初始记忆：{self.seed_memory}
 你的当前状态：{self.current_state}
-对话任务：你正在对一段对话进行思考，下方的分隔符<<<和>>>之间的文本包含了对话的上下文。
+对话任务：你正在对一段对话进行内心中的思考，下方的分隔符<<<和>>>之间的文本包含了对话的上下文。
 任务要求：你正在作为{self.name}进行思考。思考出的内容用第一人称返回，长度限制在100字以内。
 约束条件：仅仅返回思考出的内容。不要添加任何额外的信息和格式。
 辅助信息：你从记忆流中检索到了相关记忆:”“”{memory["description"]}“”“你从你的知识库中检索到了相关知识:”“”{knowledge["text"]}“”“
@@ -338,8 +332,18 @@ class Brain:
 上下文结束>>>
 '''
         print(prompt)
-        response = apis.chatgpt(prompt)
-        print(response)
+        thought = apis.chatgpt(prompt)
+        print(thought)
+        return thought
+
+    def cot_chat(self, input, history):
+        if history is None:
+            history = []
+        history.append(f"hadi:{input}")
+        context = ""
+        for chat in history:
+            context = context + chat + "\n"
+        thought = self.create_thought(input, context)
         prompt = f'''
 你的名称：{self.name}
 你的初始记忆：{self.seed_memory}
@@ -347,16 +351,17 @@ class Brain:
 对话任务：你正在进行对话，下方的分隔符<<<和>>>之间的文本包含了对话的上下文。
 任务要求：你正在作为{self.name}进行回复。回复长度限制在100字以内。
 约束条件：不要扮演其他角色，只作为{self.name}回复。不要添加任何额外的信息和格式。
-辅助信息：你进行了一些思考,你的回复要建立在这些思考的基础之上:"""{response}"""
+辅助信息：你进行了一些思考,你的回复要建立在这些思考的基础之上:"""{thought}"""
 上下文开始<<<
 {self.language_style}
 {context}
 上下文结束>>>
 '''
+        print(prompt)
         response = apis.chatgpt(prompt)
         print(response)
         history.append(f"{response}")
-        return response,history
+        return response, history
 
 if __name__ == "__main__":
     # 加载存储在JSON文件中的大脑状态。

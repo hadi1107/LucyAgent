@@ -1,8 +1,9 @@
 import gradio as gr
 import json
+import time
 from brain import LucyAgent
 from brain import Brain
-
+from agent_fsm import AgentFSM
 def save_to_file(file_path:str, conversations)-> None:
     """
     用于将对话列表保存到文件中
@@ -63,34 +64,29 @@ def mypredict(input, history=None):
 
     # 指定默认显示的图片路径
     default_image_path = "../resource/pictures/hutao_default.webp"
-
+    # image_path = hutao.fsm.get_current_emoji()
+    time.sleep(30)
+    thought = hutao.brain.create_thought(input, history_text)
+    hutao.fsm.mood_transition(f"询问：{input}", thought)
+    image_path = hutao.fsm.get_current_emoji()
     # 生成响应的音频
     default_audio_path = "../resource/audios/这是一段测试音频哟.wav"
     # audio_file_path = apis.genshin_tts(text=response.lstrip("胡桃:"), speaker="胡桃")
     audio_file_path = default_audio_path
 
-    return history_text, audio_file_path, default_image_path  # 返回历史记录文本和音频文件路径
+    return history_text, audio_file_path, image_path  # 返回历史记录文本和音频文件路径
 
 if __name__ == "__main__":
-    try:
-        with open("../resource/hutao.json", "r", encoding="utf-8") as json_file:
-            loaded_data = json.load(json_file)
-    except FileNotFoundError:
-        print("未找到指定的文件。")
-        exit()
+    with open("../resource/hutao.json", "r", encoding="utf-8") as json_file:
+        loaded_data = json.load(json_file)
 
-    hutao = LucyAgent(perception=None, brain=Brain.from_json(loaded_data), action=None)
+    mood_list = ['惊讶', '恼火', '为难', '兴奋', '开心']
+    emoji_list = ["../resource/pictures/hutao_jingya.webp", "../resource/pictures/hutao_naohuo.webp",
+                  "../resource/pictures/hutao_weinan.webp", "../resource/pictures/hutao_xingfen.webp",
+                  "../resource/pictures/hutao_yao.webp"]
+    fsm = AgentFSM("为难", mood_list, emoji_list)
 
-    # 打印状态
-    hutao.brain.show_memory()
-    hutao.brain.show_knowledge()
-
-    # 将更新后的大脑状态保存到JSON文件中。
-    try:
-        with open("../resource/hutao.json", "w", encoding="utf-8") as json_file:
-            json.dump(hutao.brain.to_json(), json_file, indent=4, ensure_ascii=False)
-    except IOError:
-        print("无法写入文件。")
+    hutao = LucyAgent(perception=None, brain=Brain.from_json(loaded_data), action=None, fsm = fsm)
 
     # 创建一个 Gradio 界面
     with gr.Blocks() as demo:

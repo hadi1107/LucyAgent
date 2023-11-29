@@ -7,6 +7,7 @@ import json
 import openai
 import requests
 
+# ！！！！！！应当重构到环境变量当中
 openai.api_key = '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'
 tts_api_key = '3c1c2c0822b56c92ceb5cd46d30e497c'
 bing_api_key = "d6fca707accf4a83a7afe9b3db0442bd"
