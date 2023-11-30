@@ -35,6 +35,7 @@ if __name__ == "__main__":
 
                 hutao.brain.fsm.mood_transition(f"收到了来自hadi的询问：{input}", thought)
                 image_path = hutao.brain.fsm.get_current_emoji()
+
                 # 生成响应的音频
                 default_audio_path = "../resource/audios/这是一段测试音频哟.wav"
                 # audio_file_path = apis.genshin_tts(text=response.lstrip("胡桃:"), speaker="胡桃")
@@ -47,7 +48,7 @@ if __name__ == "__main__":
                     # 创建一个用于显示历史记录的文本框
                     history_box = gr.Textbox(lines=10, label="Talk history")
                     # 创建一个文本框，用于输入文本
-                    txt = gr.Textbox(show_label=False, placeholder="Input text")
+                    txt = gr.Textbox(show_label=False, placeholder="Input text,such as \"胡桃可以给我来一杯咖啡吗？\"")
 
                 with gr.Column():
                     # 创建一个音频播放器
@@ -64,7 +65,7 @@ if __name__ == "__main__":
             button = gr.Button("查询 \U0001F600")
             button.click(hutao.brain.show_info ,inputs=[], outputs=agent_state)
 
-        with gr.Tab("常用prompts"):
+        with gr.Tab("常用prompt"):
             # 加载预制prompt
             def display_prompt(key: str) -> str:
                 prompts = load_prompts("../resource/key_prompt.json")

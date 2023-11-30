@@ -70,15 +70,16 @@ class Brain:
     def create_memory(self, input, output):
         """根据输入和输出创建一个记忆摘要，并返回记忆字典。"""
         summary_prompt = f"""
-你的名称：{self.name}
-你的初始记忆：{self.seed_memory}
-事件描述：你刚刚参与了一些事件，需要添加到你的记忆流里。下方的<<<和>>>之间是一段描述你参与的事件的文本。
-任务要求：基于事件内容，总结你从中获得的信息和你采取的行为。以第一人称视角提供一个简洁、陈述性的总结，字数不超过100字。
-约束条件：不要修改事件的实际内容，只提供总结，不包含任何额外信息。
-事件开始<<<
+角色名称：{self.name}
+初始记忆：{self.seed_memory}
+任务：从事件描述中总结信息和行为。
+字数限制：不超过100字。
+事件描述：
+<<<
 输入信息：{input}
 行为输出：{output}
-事件结束>>>
+>>>
+请提供一个简洁、陈述性的总结，不要修改事件的实际内容或添加额外信息。
 """
         summary = apis.chatgpt(summary_prompt)  # 假设这个函数调用返回一个字符串摘要。
         embedding_list = apis.embedding(summary)  # 假设这个函数调用返回一个嵌入向量。
@@ -120,15 +121,16 @@ class Brain:
 
         # 创建总结记忆并将其添加到记忆流
         summary_prompt = f"""
-你的名称：{self.name}
-你的初始记忆：{self.seed_memory}
-记忆总结任务：你将会看到一系列相似的记忆描述，它们在下方的分隔符<<<和>>>之间呈现。
-任务要求：反思这些记忆，并从中提取关键信息。以第一人称视角编写一个语义层面更高级的总结，长度控制在100字以内。
-约束条件：不要改变原始记忆的内容，只提供陈述性的总结。不要包含任何额外的信息或评论。
-记忆描述开始<<<
+角色名称：{self.name}
+初始记忆：{self.seed_memory}
+任务：提取并总结一系列相似记忆描述中的关键信息。
+字数限制：不超过100字。
+记忆描述：
+<<<
 {descriptions_to_summarize}
-记忆描述结束>>>
-        """
+>>>
+请以第一人称视角编写一个高语义层次的总结，不要改变原始记忆的内容或添加额外信息。
+"""
         print(summary_prompt)
         summary = apis.chatgpt(summary_prompt)  # 假设这个函数调用返回一个字符串摘要。
         print(summary)
@@ -220,14 +222,15 @@ class Brain:
     def extract_knowledge(self,source):
         """从包含知识的文本中提取知识"""
         summary_prompt = f"""
-你的名称：{self.name}
-你的初始记忆：{self.seed_memory}
-知识总结任务：你正在提取知识，下方的分隔符<<<和>>>之间的文本包含了需要被总结的知识点。
-任务要求：阅读和理解文本内容，忽略任何不必要的缩进和编码问题。提供一个准确的、陈述性的知识点总结，长度限制在100字以内。
-约束条件：不要改变知识点的原始内容，只提供总结。不要添加任何额外的信息。
-知识点文本开始<<<
+角色名称：{self.name}
+初始记忆：{self.seed_memory}
+任务：总结文本中包含的知识点。
+字数限制：不超过100字。
+知识点文本：
+<<<
 {source}
-知识点文本结束>>>
+>>>
+请提供一个准确的、陈述性的知识点总结，不要改变原始内容或添加额外信息。
 """
         summary = apis.chatgpt(summary_prompt)
         return summary
@@ -302,19 +305,20 @@ class Brain:
         memory = self.search_memory(query_embedding)
         knowledge = self.search_knowledge(query_embedding)
 
-        prompt = f'''
-你的名称：{self.name}
-你的初始记忆：{self.seed_memory}
-你的当前心情：{self.fsm.mood}
-对话任务：你正在进行对话，下方的分隔符<<<和>>>之间的文本包含了对话的上下文。
-任务要求：你正在作为{self.name}进行回复。回复长度限制在100字以内。
-约束条件：不要扮演其他角色，只作为{self.name}回复。不要添加任何额外的信息和格式。
-辅助信息：你从记忆流中检索到了相关记忆”“”{memory["description"]}“”“你从你的知识库中检索到了相关知识：”“”{knowledge["text"]}“”“
-上下文开始<<<
+        prompt = f"""
+角色名称：{self.name}
+初始记忆：{self.seed_memory}
+当前心情：{self.fsm.mood}
+任务：作为{self.name}进行回复。
+字数限制：不超过100字。
+辅助信息：相关记忆：“{memory['description']}” 相关知识：“{knowledge['text']}”
+对话上下文：
+<<<
 {self.language_style}
 {context}
-上下文结束>>>
-'''
+>>>
+请以{self.name}的身份回复，不要扮演其他角色或添加额外信息。
+"""
         print(prompt)
         response = apis.chatgpt(prompt)
         print(response)
@@ -322,19 +326,20 @@ class Brain:
         return response, history
 
     def create_thought(self, memory, knowledge, context):
-        prompt = f'''
-你的名称：{self.name}
-你的初始记忆：{self.seed_memory}
-你的当前心情：{self.fsm.mood}
-对话任务：你正在对一段对话进行内心中的思考，下方的分隔符<<<和>>>之间的文本包含了对话的上下文。
-任务要求：你正在作为{self.name}进行思考。思考出的内容用第一人称返回，长度限制在100字以内。
-约束条件：仅仅返回思考出的内容。不要添加任何额外的信息和格式。
-辅助信息：你从记忆流中检索到了相关记忆:”“”{memory["description"]}“”“你从你的知识库中检索到了相关知识:”“”{knowledge["text"]}“”“
-上下文开始<<<
+        prompt = f"""
+角色名称：{self.name}
+初始记忆：{self.seed_memory}
+当前心情：{self.fsm.mood}
+任务：进行内心思考并返回内容。
+字数限制：不超过100字。
+辅助信息：相关记忆：“{memory['description']}” 相关知识：“{knowledge['text']}”
+对话上下文：
+<<<
 {self.language_style}
 {context}
-上下文结束>>>
-'''
+>>>
+请仅返回思考内容，不要添加额外信息或格式。
+"""
         print(prompt)
         thought = apis.chatgpt(prompt)
         print(thought)
@@ -354,19 +359,20 @@ class Brain:
         knowledge = self.search_knowledge(query_embedding)
         thought = self.create_thought(memory, knowledge, context)
 
-        prompt = f'''
-你的名称：{self.name}
-你的初始记忆：{self.seed_memory}
-你的当前心情：{self.fsm.mood}
-对话任务：你正在进行对话，下方的分隔符<<<和>>>之间的文本包含了对话的上下文。
-任务要求：你正在作为{self.name}进行回复。回复长度限制在100字以内。
-约束条件：不要扮演其他角色，只作为{self.name}回复。不要添加任何额外的信息和格式。
-辅助信息：你进行了一些思考,你的回复要建立在这些思考的基础之上:"""{thought}"""
-上下文开始<<<
+        prompt = f"""
+角色名称：{self.name}
+初始记忆：{self.seed_memory}
+当前心情：{self.fsm.mood}
+任务：基于思考内容进行回复。
+字数限制：不超过100字。
+辅助信息：思考内容：“{thought}”
+对话上下文：
+<<<
 {self.language_style}
 {context}
-上下文结束>>>
-'''
+>>>
+请在思考内容的基础上进行回复，不要扮演其他角色或添加额外信息。
+"""
         print(prompt)
         response = apis.chatgpt(prompt)
         print(response)

@@ -1,5 +1,17 @@
 # LucyAgent：LLM-based agent设计实践
 
+记得加emoji和总览图，尽量用gpt减轻工作量
+
+## 主要特性
+- Perception,Brain,Action框架
+- 记忆流
+- 知识库
+- 工具库（如wiki检索）
+- LLM决策的有限状态机
+- Gradio可视化
+- 充分的prompt设计
+- 不依赖langchain
+
 ## brain模块
 
 ### 记忆模块设计
@@ -56,7 +68,11 @@ knowledge = {
 
 - `memory_stream`: 数组类型，旨在捕捉角色记忆流的数据，初始为一个空数组。
 
-### 示例JSON
+- `mood_list`: 数组类型，指的是fsm的可能状态。
+
+- `emoji_list`: 数组类型，指的是fsm中的状态对应的资源列表，在本例中简单地用对应表情包指示。
+
+### JSON映射到NPC的属性
 ```json
 {
   "name": "角色名称",
@@ -64,6 +80,8 @@ knowledge = {
   "language_style": "角色语言风格描述",
   "current_state": "角色当前状态描述",
   "basic_knowledge": [],
-  "memory_stream": []
+  "memory_stream": [],
+  "mood_list": [],
+  "emoji_list": []
 }
 ```

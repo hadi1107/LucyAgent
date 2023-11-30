@@ -23,17 +23,16 @@ class AgentFSM:
 
     def determine_mood_transition(self, trigger, thought):
         # 构造中文提示文本
-        prompt = f"""
-你现在要驱动角色心情的转换。
-角色当前心情:{self.mood}
-角色观察到的事件是:{trigger}
-角色的想法是：{thought}
-可能的心情有:{self.mood_list}
-要求：注意理解事件和想法的情感色彩，再去推理接下来可能的心情。
-根据上述信息返回下一个心情，只能在可能的心情列表里面选择一个,比如”{self.mood_list[0]}“。不要进行任何额外输出。
-        """
-        print(prompt)
-        response = apis.chatgpt(prompt)
+        mood_transition_prompt = f"""
+角色当前心情：{self.mood}
+观察到的事件：{trigger}
+角色的想法：{thought}
+可能的心情列表：{self.mood_list}
+任务：根据事件和想法的情感色彩，推理下一个心情。
+请从可能的心情列表中选择一个心情，例如“{self.mood_list[0]}”，不要进行额外输出。
+"""
+        print(mood_transition_prompt)
+        response = apis.chatgpt(mood_transition_prompt)
         print(f"输出状态为:{response}")
         new_mood = response.strip()
         return new_mood
