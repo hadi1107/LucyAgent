@@ -28,18 +28,31 @@ if __name__ == "__main__":
                 if history is None:
                     history = []
                 response, history, thought = hutao.brain.cot_chat(input, history)
+
+                input = f"收到了来自hadi的询问：{input}"
+                output = f"进行了思考：{thought},做出了回复：{response}"
+                memory = hutao.brain.create_memory(input,output)
+                print(memory)
+                hutao.brain.add_memory(memory)
+
                 history_text = ""  # 初始化历史记录文本
                 for chat in history:  # 遍历历史记录
                     history_text = history_text + chat + "\n"
                 save_to_file("../resource/conversations.json", history)
 
-                hutao.brain.fsm.mood_transition(f"收到了来自hadi的询问：{input}", thought)
+                hutao.brain.fsm.mood_transition(input, thought)
                 image_path = hutao.brain.fsm.get_current_emoji()
 
                 # 生成响应的音频
                 default_audio_path = "../resource/audios/这是一段测试音频哟.wav"
                 # audio_file_path = apis.genshin_tts(text=response.lstrip("胡桃:"), speaker="胡桃")
                 audio_file_path = default_audio_path
+
+                try:
+                    with open("../resource/hutao.json", "w", encoding="utf-8") as json_file:
+                        json.dump(hutao.brain.to_json(), json_file, indent=4, ensure_ascii=False)
+                except IOError:
+                    print("无法写入文件。")
 
                 return history_text, audio_file_path, image_path  # 返回历史记录文本和音频文件路径
 

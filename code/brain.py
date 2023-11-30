@@ -184,8 +184,8 @@ class Brain:
         """展示所有记忆的摘要、创建时间和嵌入向量的大小。"""
         memory_str = ""
         if not self.memory_stream:
-            print("没有记忆")
-            return
+            print("没有记忆单元")
+            return "没有记忆单元"
         print(f"记忆条数：{len(self.memory_stream)}")
         memory_str = memory_str + f"记忆条数：{len(self.memory_stream)}\n"
         for memory in self.memory_stream:
@@ -217,7 +217,11 @@ class Brain:
 
             return most_similar_memory
 
-        return None
+        return {
+            "description":"没有记忆单元",
+            "create_time": "没有记忆单元",
+            "embedding":[]
+        }
 
     def extract_knowledge(self,source):
         """从包含知识的文本中提取知识"""
@@ -261,8 +265,8 @@ class Brain:
         """展示所有知识。"""
         knowledge_str = ""
         if not self.basic_knowledge:
-            print("没有知识")
-            return
+            print("没有知识单元")
+            return "没有知识单元"
         print(f"知识条数：{len(self.basic_knowledge)}")
         knowledge_str = knowledge_str + f"知识条数：{len(self.basic_knowledge)}\n"
         for knowledge in self.basic_knowledge:
@@ -277,20 +281,26 @@ class Brain:
 
     def search_knowledge(self, query_embedding):
         """搜索知识的方法，只返回最相似的一个知识项"""
-        # 初始化最高相似度和相应的知识项
-        max_similarity = -1
-        most_similar_knowledge = None
+        if self.basic_knowledge:
+            # 初始化最高相似度和相应的知识项
+            max_similarity = -1
+            most_similar_knowledge = None
 
-        # 遍历所有知识项
-        for knowledge in self.basic_knowledge:
-            # 计算点积
-            similarity = cosine_similarity(query_embedding,knowledge["embedding"])
-            # 更新最高相似度和相应的知识项
-            if similarity > max_similarity:
-                max_similarity = similarity
-                most_similar_knowledge = knowledge
+            # 遍历所有知识项
+            for knowledge in self.basic_knowledge:
+                # 计算点积
+                similarity = cosine_similarity(query_embedding,knowledge["embedding"])
+                # 更新最高相似度和相应的知识项
+                if similarity > max_similarity:
+                    max_similarity = similarity
+                    most_similar_knowledge = knowledge
 
-        return most_similar_knowledge
+            return most_similar_knowledge
+
+        return{
+            "text": "没有知识单元",
+            "embedding": []
+        }
 
     def chat(self, input, history):
         query_embedding = apis.embedding(input)[0]
@@ -391,6 +401,7 @@ if __name__ == "__main__":
     hutao = LucyAgent(perception=None, brain=Brain.from_json(loaded_data), action=None)
 
     # 打印状态
+    hutao.brain.del_memory()
     hutao.brain.show_info()
 
     # history = None
@@ -399,8 +410,8 @@ if __name__ == "__main__":
     # 胡桃: 当然可以！请问您喜欢什么口味的咖啡呢？我们这里有各种不同的选择。
 
 
-    history = None
-    hutao.brain.cot_chat("胡桃可以给我来一杯咖啡吗？",history)
+    # history = None
+    # hutao.brain.cot_chat("胡桃可以给我来一杯咖啡吗？",history)
     # 结果：
     # 我在思考对方的请求是否合适。作为往生堂的堂主，我应该保持礼貌并尽力帮助他人。但是，作为一名读书人，我也需要专注于我的学习。
     # 或许我可以告诉他我正在读书，并询问他是否还需要其他帮助。这样既能满足他的需求，也不会打断我的学习。

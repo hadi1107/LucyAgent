@@ -7,10 +7,9 @@ import json
 import openai
 import requests
 
-# ！！！！！！应当重构到环境变量当中
-openai.api_key = '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'
-tts_api_key = '3c1c2c0822b56c92ceb5cd46d30e497c'
-bing_api_key = "d6fca707accf4a83a7afe9b3db0442bd"
+openai.api_key = os.getenv('OPENAI_API_KEY')
+tts_api_key = os.getenv('TTS_API_KEY')
+bing_api_key = os.getenv('BING_API_KEY')
 
 def chatgpt(prompt:str) -> str:
     """
@@ -195,5 +194,4 @@ def bing_search(query: str, mkt: str = "zh-CN") -> list:
     except Exception as e:
         print(f"An error occurred: {e}")
         return f"An error occurred: {e}"
-
 
