@@ -6,8 +6,9 @@
 - 🏫 知识库
 - 🔧 工具库（例如wiki检索）
 - 🎮 LLM决策的有限状态机
-- 🎨 Gradio可视化
 - ✍️ 充分的prompt设计
+- 📔 完整的logging
+- 🎨 Gradio可视化
 - 🚫 不依赖langchain
 
 ## 🧠 brain模块

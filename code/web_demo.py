@@ -29,17 +29,18 @@ if __name__ == "__main__":
                     history = []
                 response, history, thought = hutao.brain.cot_chat(input, history)
 
-                input = f"收到了来自hadi的询问：{input}"
-                output = f"进行了思考：{thought},做出了回复：{response}"
-                memory = hutao.brain.create_memory(input,output)
-                print(memory)
-                hutao.brain.add_memory(memory)
+                # input = f"收到了来自hadi的询问：{input}"
+                # output = f"进行了思考：{thought},做出了回复：{response}"
+                # memory = hutao.brain.create_memory(input,output)
+                # print(memory)
+                # hutao.brain.add_memory(memory)
 
                 history_text = ""  # 初始化历史记录文本
                 for chat in history:  # 遍历历史记录
                     history_text = history_text + chat + "\n"
                 save_to_file("../resource/conversations.json", history)
 
+                # 获取心情驱动的表情包
                 hutao.brain.fsm.mood_transition(input, thought)
                 image_path = hutao.brain.fsm.get_current_emoji()
 

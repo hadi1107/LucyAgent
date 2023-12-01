@@ -1,10 +1,20 @@
 import time
 import json
 import numpy as np
-import apis  # 用于与外部API进行交互。
+import logging
+
+import apis
 from agent_fsm import AgentFSM
 
 MEMORY_LIMIT = 10
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    filename='../agent.log',  # 指定日志文件的名称
+    filemode='w',  # 'a' 表示追加模式，如果每次运行时都创建新文件，可以使用 'w'
+)
+logger = logging.getLogger(__name__)
 
 def cosine_similarity(embedding1, embedding2):
     """计算两个嵌入向量之间的余弦相似度。"""
@@ -51,20 +61,22 @@ class Brain:
     @classmethod
     def from_json(cls, json_data):
         """从JSON格式的数据创建Brain实例。"""
+        logger.info(f"按照{json_data}对Brain模块进行了初始化")
         return cls(**json_data)
 
     def show_info(self):
         # 创建一个描述大脑状态的字符串
         info = f"Brain Info:\n"
-        info += f"Name: {self.name}\n"
-        info += f"Seed Memory: {self.seed_memory}\n"
-        info += f"Language Style: \n{self.language_style}\n"
-        info += f"Memory Limit: {self.memory_limit}\n"
-        info += f"mood_list: {self.mood_list}\n"
-        info += f"emoji_list: {self.emoji_list}\n"
-        info += f"mood: {self.fsm.mood}\n"
+        info += f"Name: {self.name}\n\n"
+        info += f"Seed Memory: {self.seed_memory}\n\n"
+        info += f"Language Style: \n{self.language_style}\n\n"
+        info += f"Memory Limit: {self.memory_limit}\n\n"
+        info += f"mood_list: {self.mood_list}\n\n"
+        info += f"emoji_list: {self.emoji_list}\n\n"
+        info += f"mood: {self.fsm.mood}\n\n"
         info += self.show_knowledge()
         info += self.show_memory()
+        logger.info(f"打印了Brain模块的相关信息：{info}")
         return info
 
     def create_memory(self, input, output):
@@ -89,14 +101,18 @@ class Brain:
             "create_time": time_string,
             "embedding": embedding_list[0]
         }
+        logger.info(f"从{input}和{output}中创建了新记忆：{summary}")
         return memory
 
     def add_memory(self, memory):
         """将一个记忆添加到记忆流中。"""
         self.memory_stream.append(memory)
+        description = memory["description"]
+        logger.info(f"添加了新记忆：{description}")
         # 检查记忆流是否达到上限
         if len(self.memory_stream) == self.memory_limit:
             self.summarize_memory()
+
 
     def summarize_memory(self):
         embeddings = np.array([memory['embedding'] for memory in self.memory_stream[:-1]])
@@ -113,11 +129,12 @@ class Brain:
 
         for i in top_indices:
             descriptions_to_summarize += self.memory_stream[i]['description'] + " "
-            # 删除操作移动到循环外进行
 
         # 删除选中的记忆
         for i in top_indices:
+            description = self.memory_stream[i]["description"]
             del self.memory_stream[i]
+            logger.info(f"因为需要总结而删除了记忆：{description}")
 
         # 创建总结记忆并将其添加到记忆流
         summary_prompt = f"""
@@ -134,6 +151,7 @@ class Brain:
         print(summary_prompt)
         summary = apis.chatgpt(summary_prompt)  # 假设这个函数调用返回一个字符串摘要。
         print(summary)
+        logger.info(f"从记忆子集：{descriptions_to_summarize}\n总结了相关记忆：{summary}")
         embedding_list = apis.embedding(summary)  # 假设这个函数调用返回一个嵌入向量。
         time_string = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         memory = {
@@ -155,11 +173,13 @@ class Brain:
             try:
                 description = self.memory_stream[index]["description"]
                 del self.memory_stream[index]
-                print(f"删除了\"{description}\"")
+                logger.info(f"删除了记忆:{description}")
+                print(f"删除了记忆:{description}")
             except IndexError:
                 print("提供的索引超出了记忆流的范围。")
         elif mode == "all":
             self.memory_stream.clear()  # 清空整个列表
+            logger.info("已清空所有记忆。")
             print("已清空所有记忆。")
         elif mode == "search":
             if query:
@@ -170,6 +190,7 @@ class Brain:
                     # 如果找到匹配的记忆，从记忆流中删除
                     try:
                         self.memory_stream.remove(memory)
+                        logger.info(f"删除了匹配查询\"{query}\"的记忆：\"{memory['description']}\"")
                         print(f"删除了匹配查询\"{query}\"的记忆：\"{memory['description']}\"")
                     except ValueError:
                         print("未能删除记忆，可能已被删除。")
@@ -184,44 +205,55 @@ class Brain:
         """展示所有记忆的摘要、创建时间和嵌入向量的大小。"""
         memory_str = ""
         if not self.memory_stream:
-            print("没有记忆单元")
-            return "没有记忆单元"
-        print(f"记忆条数：{len(self.memory_stream)}")
-        memory_str = memory_str + f"记忆条数：{len(self.memory_stream)}\n"
-        for memory in self.memory_stream:
+            memory_str = "没有记忆单元"
+            print(memory_str)
+            return memory_str
+
+        memory_count = len(self.memory_stream)
+        memory_str += f"记忆条数：{memory_count}\n"
+        memory_str += f"{'-' * 40}\n"  # 添加分隔线
+
+        for idx, memory in enumerate(self.memory_stream, 1):
             description = memory["description"]
             create_time = memory["create_time"]
-            embedding = memory["embedding"]
-            print("---------------------------------------")
-            print(f"记忆描述: {description}\n创建时间: {create_time}\n嵌入向量大小: {len(embedding)}")
-            print("---------------------------------------")
-            memory_str = memory_str + f"记忆描述: {description}\n创建时间: {create_time}\n嵌入向量大小: {len(embedding)}\n"
+            embedding_size = len(memory["embedding"])
+            memory_str += (
+                f"记忆 #{idx}\n"
+                f"描述: {description}\n"
+                f"创建时间: {create_time}\n"
+                f"嵌入向量大小: {embedding_size}\n"
+                f"{'-' * 40}\n"
+            )
 
+        print(memory_str)
         return memory_str
 
     def search_memory(self, query_embedding):
         """搜索记忆的方法，只返回最相似的一个记忆项"""
-        if self.memory_stream:
-            # 初始化最高相似度和相应的记忆项
-            max_similarity = -1
-            most_similar_memory = None
+        # 如果没有记忆项，直接返回提示信息
+        if not self.memory_stream:
+            return {
+                "description": "没有记忆单元",
+                "create_time": "没有记忆单元",
+                "embedding": []
+            }
 
-            # 遍历所有记忆项
-            for memory in self.memory_stream:
-                # 计算点积
-                similarity = cosine_similarity(query_embedding, memory["embedding"])
-                # 更新最高相似度和相应的记忆项
-                if similarity > max_similarity:
-                    max_similarity = similarity
-                    most_similar_memory = memory
+        # 初始化最高相似度和相应的记忆项
+        max_similarity = -1
+        most_similar_memory = None
 
-            return most_similar_memory
+        # 遍历所有记忆项
+        for memory in self.memory_stream:
+            # 计算相似度
+            similarity = cosine_similarity(query_embedding, memory["embedding"])
+            # 更新最高相似度和相应的记忆项
+            if similarity > max_similarity:
+                max_similarity = similarity
+                most_similar_memory = memory
 
-        return {
-            "description":"没有记忆单元",
-            "create_time": "没有记忆单元",
-            "embedding":[]
-        }
+        description = most_similar_memory["description"]
+        logger.info(f"找到了相关记忆：{description}")
+        return most_similar_memory
 
     def extract_knowledge(self,source):
         """从包含知识的文本中提取知识"""
@@ -237,16 +269,18 @@ class Brain:
 请提供一个准确的、陈述性的知识点总结，不要改变原始内容或添加额外信息。
 """
         summary = apis.chatgpt(summary_prompt)
+        logger.info(f"从{source}提取了知识点：{summary}")
         return summary
 
     def add_knowledge(self, text):
-        """添加一个知识添加到知识库中。"""
+        """添加单个知识添加到知识库中。"""
         embedding_list = apis.embedding(text)
         knowledge = {
             "text": text,
             "embedding": embedding_list[0]
         }
         self.basic_knowledge.append(knowledge)
+        logger.info(f"添加了知识：{text}")
 
     def del_knowledge(self, mode="single", index=0):
         """从记忆流中删除指定索引的记忆。"""
@@ -254,6 +288,7 @@ class Brain:
             try:
                 text= self.basic_knowledge[index]["text"]
                 del self.basic_knowledge[index]
+                logger.info(f"删除了记忆:{text}")
                 print(f"删除了\"{text}\"")
             except IndexError:
                 print("提供的索引超出了知识库的范围。")
@@ -265,42 +300,52 @@ class Brain:
         """展示所有知识。"""
         knowledge_str = ""
         if not self.basic_knowledge:
-            print("没有知识单元")
-            return "没有知识单元"
-        print(f"知识条数：{len(self.basic_knowledge)}")
-        knowledge_str = knowledge_str + f"知识条数：{len(self.basic_knowledge)}\n"
-        for knowledge in self.basic_knowledge:
-            text = knowledge["text"]
-            embedding = knowledge["embedding"]
-            print("---------------------------------------")
-            print(f"知识描述: {text}\n嵌入向量大小: {len(embedding)}")
-            print("---------------------------------------")
-            knowledge_str = knowledge_str + f"知识描述: {text}\n嵌入向量大小: {len(embedding)}\n"
+            knowledge_str = "没有知识单元"
+            print(knowledge_str)
+            return knowledge_str
 
+        knowledge_count = len(self.basic_knowledge)
+        knowledge_str += f"知识条数：{knowledge_count}\n"
+        knowledge_str += f"{'-' * 40}\n"  # 添加分隔线
+
+        for idx, knowledge in enumerate(self.basic_knowledge, 1):
+            text = knowledge["text"]
+            embedding_size = len(knowledge["embedding"])
+            knowledge_str += (
+                f"知识 #{idx}\n"
+                f"描述: {text}\n"
+                f"嵌入向量大小: {embedding_size}\n"
+                f"{'-' * 40}\n"
+            )
+
+        print(knowledge_str)
         return knowledge_str
 
     def search_knowledge(self, query_embedding):
         """搜索知识的方法，只返回最相似的一个知识项"""
-        if self.basic_knowledge:
-            # 初始化最高相似度和相应的知识项
-            max_similarity = -1
-            most_similar_knowledge = None
+        # 如果没有知识项，直接返回提示信息
+        if not self.basic_knowledge:
+            return {
+                "text": "没有知识单元",
+                "embedding": []
+            }
 
-            # 遍历所有知识项
-            for knowledge in self.basic_knowledge:
-                # 计算点积
-                similarity = cosine_similarity(query_embedding,knowledge["embedding"])
-                # 更新最高相似度和相应的知识项
-                if similarity > max_similarity:
-                    max_similarity = similarity
-                    most_similar_knowledge = knowledge
+        # 初始化最高相似度和相应的知识项
+        max_similarity = -1
+        most_similar_knowledge = None
 
-            return most_similar_knowledge
+        # 遍历所有知识项
+        for knowledge in self.basic_knowledge:
+            # 计算点积
+            similarity = cosine_similarity(query_embedding, knowledge["embedding"])
+            # 更新最高相似度和相应的知识项
+            if similarity > max_similarity:
+                max_similarity = similarity
+                most_similar_knowledge = knowledge
 
-        return{
-            "text": "没有知识单元",
-            "embedding": []
-        }
+        logger.info(f"找到了最相似的知识：{most_similar_knowledge['text']}")
+        return most_similar_knowledge
+
 
     def chat(self, input, history):
         query_embedding = apis.embedding(input)[0]
@@ -330,8 +375,10 @@ class Brain:
 请以{self.name}的身份回复，不要扮演其他角色或添加额外信息。
 """
         print(prompt)
+        logger.info(f"生成了对话提示：{prompt}")
         response = apis.chatgpt(prompt)
         print(response)
+        logger.info(f"生成了回复：{response}")
         history.append(f"{response}")
         return response, history
 
@@ -351,8 +398,10 @@ class Brain:
 请仅返回思考内容，不要添加额外信息或格式。
 """
         print(prompt)
+        logger.info(f"生成了思考提示：{prompt}")
         thought = apis.chatgpt(prompt)
         print(thought)
+        logger.info(f"生成了思考内容：{thought}")
         return thought
 
     def cot_chat(self, input, history):
@@ -384,8 +433,10 @@ class Brain:
 请在思考内容的基础上进行回复，不要扮演其他角色或添加额外信息。
 """
         print(prompt)
+        logger.info(f"生成了对话提示：{prompt}")
         response = apis.chatgpt(prompt)
         print(response)
+        logger.info(f"生成了回复：{response}")
         history.append(f"{response}")
         return response, history, thought
 
