@@ -28,7 +28,7 @@ class AgentFSM:
 观察到的事件：{trigger}
 角色的想法：{thought}
 可能的心情列表：{self.mood_list}
-任务：根据事件和想法的情感色彩，推理下一个心情。
+任务：根据事件和想法的情感色彩，推理下一个心情，心情可以是不变的。
 请从可能的心情列表中选择一个心情，例如“{self.mood_list[0]}”，不要进行额外输出。
 """
         print(mood_transition_prompt)

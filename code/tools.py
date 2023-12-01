@@ -3,8 +3,8 @@ tools.py:定义一些工具性的agent可用函数
 """
 import json
 import requests
-import simpleaudio as sa
 from bs4 import BeautifulSoup
+import simpleaudio as sa
 
 def play_wav(wave_file:str) -> None:
     """
@@ -26,6 +26,10 @@ def scrape_webpage(url: str) -> dict:
 
     返回:
     data: 包含网页标题和所有文本内容的字典
+    {
+        'title': title,
+        'text': text,
+    }
     """
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36',
@@ -138,11 +142,11 @@ def get_wikipedia_text(search_query:str, language='zh')->dict:
 
 # 使用示例
 if __name__ == "__main__":
-    url = "https://zhuanlan.zhihu.com/p/664880302"
-    web_page_object = scrape_webpage(url)
-    print( web_page_object["text"])
+    # url = "https://zhuanlan.zhihu.com/p/664880302"
+    # web_page_object = scrape_webpage(url)
+    # print( web_page_object["text"])
 
-    page_title = "腾讯光子"
+    page_title = "绝区零"
     wiki_obejct = get_wikipedia_text(page_title)
     print(wiki_obejct["url"])
     print(wiki_obejct["content"])
