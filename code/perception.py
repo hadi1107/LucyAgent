@@ -1,4 +1,5 @@
 import PyPDF2
+import apis
 
 class LucyAgent:
     """代表一个具有感知、大脑和行为能力的智能代理。"""
@@ -51,7 +52,7 @@ class Perception:
         # 将所有页面的文本连接成一个字符串并返回
         return '\n'.join(text_content)
 
-    def split_text_by_min_length(self, text, min_length=500, buffer_min_length=150):
+    def split_text(self, text, min_length=500, buffer_min_length=150):
         # 初始化变量
         segments = []
         current_segment = ''
@@ -80,7 +81,7 @@ class Perception:
             # 如果当前段落达到指定长度，则结束当前段落
             if len(current_segment) >= min_length:
                 # 将当前段落添加到段落列表
-                segments.append(current_segment.strip())
+                segments.append(current_segment.replace(' ','').replace('\n',''))
                 # 重置当前段落为最后一句
                 current_segment = cleard_buffer
 
@@ -90,10 +91,22 @@ class Perception:
 
         return segments
 
+    def get_text_embedding_pairs(self,segments):
+        """获取text_embedding对的列表"""
+        embeddings = apis.embedding(segments)
+        pairs = []
+        for i in range(len(segments)):
+            text_embedding_pair = {
+                "text":segments[i],
+                "embedding":embeddings[i]
+            }
+            pairs.append(text_embedding_pair)
+        return pairs
+
 if __name__ == "__main__":
     perception = Perception()
     pdf_text = perception.read_pdf('../resource/zzz.pdf')
-    segments = perception.split_text_by_min_length(pdf_text)
+    segments = perception.split_text(pdf_text)
 
     # 打印分割后的段落
     for segment in segments:

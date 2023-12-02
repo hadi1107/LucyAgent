@@ -1,5 +1,6 @@
 import gradio as gr
 import json
+from perception import Perception
 from brain import LucyAgent
 from brain import Brain
 
@@ -16,7 +17,8 @@ if __name__ == "__main__":
     with open("../resource/hutao.json", "r", encoding="utf-8") as json_file:
         loaded_data = json.load(json_file)
 
-    hutao = LucyAgent(perception=None, brain=Brain.from_json(loaded_data), action=None)
+    perception = Perception()
+    hutao = LucyAgent(perception=perception, brain=Brain.from_json(loaded_data), action=None)
 
     # 创建一个 Gradio 界面
     with gr.Blocks() as demo:
@@ -78,6 +80,18 @@ if __name__ == "__main__":
             agent_state = gr.Textbox(label="Hutao's state")
             button = gr.Button("查询 \U0001F600")
             button.click(hutao.brain.show_info ,inputs=[], outputs=agent_state)
+
+        with gr.Tab("Read PDF"):
+            def turn_pdf_into_segments(pdf_path):
+                text = hutao.perception.read_pdf(pdf_path)
+                segments = hutao.perception.split_text(text)
+                segments_str = ""
+                for idx,segment in enumerate(segments,1):
+                    segments_str += f"文本段{idx}\n描述:\n{segment}\n{'-' * 40}\n"
+
+                return segments_str
+
+            gr.Interface(fn=turn_pdf_into_segments, inputs="file", outputs="text",allow_flagging="never")
 
         with gr.Tab("常用prompt"):
             # 加载预制prompt

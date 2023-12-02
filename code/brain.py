@@ -272,7 +272,13 @@ class Brain:
         logger.info(f"从{source}提取了知识点：{summary}")
         return summary
 
-    def add_knowledge(self, text):
+    def add_knowledge_list(self,knowledge_list):
+        """添加一个知识对象列表添加到知识库中。"""
+        for knowledge in knowledge_list:
+            self.basic_knowledge.append(knowledge)
+            logger.info(f"添加了知识：{knowledge['text']}")
+
+    def add_knowledge_from_text(self, text):
         """添加单个知识添加到知识库中。"""
         embedding_list = apis.embedding(text)
         knowledge = {
