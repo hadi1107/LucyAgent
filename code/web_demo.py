@@ -25,7 +25,7 @@ if __name__ == "__main__":
         # 创建一个状态对象，用于存储历史记录
         state = gr.State([])
 
-        with gr.Tab("Talk with Hutao"):
+        with gr.Tab("和胡桃对话！"):
             def mypredict(input, history=None):
                 if history is None:
                     history = []
@@ -62,38 +62,50 @@ if __name__ == "__main__":
             with gr.Row():
                 with gr.Column():
                     # 创建一个用于显示历史记录的文本框
-                    history_box = gr.Textbox(lines=10, label="Talk history")
+                    history_box = gr.Textbox(lines=10, label="对话历史记录")
                     # 创建一个文本框，用于输入文本
-                    txt = gr.Textbox(show_label=False, placeholder="Input text,such as \"胡桃可以给我来一杯咖啡吗？\"")
+                    txt = gr.Textbox(show_label=False, placeholder="输入文本，例如\"胡桃可以给我来一杯咖啡吗？\"")
 
                 with gr.Column():
                     # 创建一个音频播放器
-                    audio_box = gr.Audio(label = "Hutao's audio")
+                    audio_box = gr.Audio(label = "胡桃返回的音频")
                     # 创建 Image 组件并设置默认图片
-                    image_box = gr.Image(label="Hutao's mood",height = 200)
+                    image_box = gr.Image(label="胡桃心情对应的表情",height = 200)
 
-            # 创建一个按钮，当按钮被点击时，调用 mypredict 函数，并将文本框的内容和状态对象作为参数，将历史记录文本框和音频播放器作为输出
+            # 按钮被点击时，调用 mypredict 函数，并将文本框的内容和状态对象作为参数，将历史记录文本框和音频播放器作为输出
             button = gr.Button("发送 \U0001F600")
             button.click(mypredict, [txt, state], [history_box, audio_box, image_box])
 
-        with gr.Tab("Observe Hutao"):
-            agent_state = gr.Textbox(label="Hutao's state")
+        with gr.Tab("观察和管理胡桃的Brain模块状态"):
+            agent_state = gr.Textbox(label="胡桃的Brian模块状态")
             button = gr.Button("查询 \U0001F600")
             button.click(hutao.brain.show_info ,inputs=[], outputs=agent_state)
 
-        with gr.Tab("Read PDF"):
-            def turn_pdf_into_segments(pdf_path):
+        with gr.Tab("加载PDF并注入知识库"):
+            def add_knowledge(pdf_path):
                 text = hutao.perception.read_pdf(pdf_path)
                 segments = hutao.perception.split_text(text)
-                segments_str = ""
-                for idx,segment in enumerate(segments,1):
-                    segments_str += f"文本段{idx}\n描述:\n{segment}\n{'-' * 40}\n"
+                pairs = hutao.perception.get_text_embedding_pairs(segments)
+                hutao.brain.add_knowledge_list(pairs)
+                try:
+                    with open("../resource/hutao.json", "w", encoding="utf-8") as json_file:
+                        json.dump(hutao.brain.to_json(), json_file, indent=4, ensure_ascii=False)
+                except IOError:
+                    print("无法写入文件。")
 
-                return segments_str
+                pairs_str = ""
+                for idx,pair in enumerate(pairs,1):
+                    pairs_str += (f"知识单元{idx}\n"
+                                  f"描述:\n{pair['text']}\n"
+                                  f"嵌入向量大小:{len(pair['embedding'])}\n"
+                                  f"{'-' * 40}\n")
 
-            gr.Interface(fn=turn_pdf_into_segments, inputs="file", outputs="text",allow_flagging="never")
+                return pairs_str
 
-        with gr.Tab("常用prompt"):
+            gr.Interface(fn=add_knowledge, title="将PDF文件的知识注入到知识库", inputs="file", outputs="text",
+                         allow_flagging="never")
+
+        with gr.Tab("常用的Prompts"):
             # 加载预制prompt
             def display_prompt(key: str) -> str:
                 prompts = load_prompts("../resource/key_prompt.json")
@@ -101,6 +113,7 @@ if __name__ == "__main__":
                 return prompt
 
             keys = load_prompts('../resource/key_prompt.json').keys()  # 获取所有的key
-            iface = gr.Interface(display_prompt, gr.Dropdown(keys, label="prompt功能"), gr.Textbox( label="通用prompt",show_copy_button = True),allow_flagging="never")
+            iface = gr.Interface(display_prompt, gr.Dropdown(keys, label="需要的Prompt功能"),
+                                 gr.Textbox( label="通用Prompt内容",show_copy_button = True),allow_flagging="never")
 
     demo.queue().launch(share=False)

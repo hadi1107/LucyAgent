@@ -459,6 +459,7 @@ if __name__ == "__main__":
 
     # 打印状态
     hutao.brain.del_memory()
+    hutao.brain.del_knowledge(mode="all")
     hutao.brain.show_info()
 
     # history = None

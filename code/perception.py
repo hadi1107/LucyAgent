@@ -1,3 +1,4 @@
+import json
 import PyPDF2
 import apis
 
@@ -101,16 +102,20 @@ class Perception:
                 "embedding":embeddings[i]
             }
             pairs.append(text_embedding_pair)
+
+        with open("../resource/pairs.json","w",encoding="utf-8") as f:
+            json.dump(pairs,f,indent=4, ensure_ascii=False)
+
         return pairs
 
 if __name__ == "__main__":
     perception = Perception()
     pdf_text = perception.read_pdf('../resource/zzz.pdf')
     segments = perception.split_text(pdf_text)
-
+    pairs = perception.get_text_embedding_pairs(segments)
     # 打印分割后的段落
-    for segment in segments:
-        print(segment)
+    for pair in pairs:
+        print(pair)
         print("------")
 
 
