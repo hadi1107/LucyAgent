@@ -66,14 +66,15 @@ class Brain:
 
     def show_info(self):
         # 创建一个描述大脑状态的字符串
-        info = f"Brain Info:\n"
+        info = f"静态的Brain Info:\n"
         info += f"Name: {self.name}\n\n"
         info += f"Seed Memory: {self.seed_memory}\n\n"
-        info += f"Language Style: \n{self.language_style}\n\n"
+        info += f"Language Style(使用问候的对话作为对话基调): \n{self.language_style}\n\n"
         info += f"Memory Limit: {self.memory_limit}\n\n"
-        info += f"mood_list: {self.mood_list}\n\n"
-        info += f"emoji_list: {self.emoji_list}\n\n"
-        info += f"mood: {self.fsm.mood}\n\n"
+        info += f"Mood List: {self.mood_list}\n\n"
+        info += f"Emoji List: {self.emoji_list}\n\n"
+        info += f"动态的Brain Info:\n"
+        info += f"Mood: {self.fsm.mood}\n\n"
         info += self.show_knowledge()
         info += self.show_memory()
         logger.info(f"打印了Brain模块的相关信息：{info}")
@@ -161,7 +162,7 @@ class Brain:
         }
         self.add_memory(memory)
 
-    def del_memory(self, mode="single", index=0, query=""):
+    def del_memory(self, index=0, mode="single",  query=""):
         """从记忆流中删除记忆。
 
         参数:
@@ -175,12 +176,15 @@ class Brain:
                 del self.memory_stream[index]
                 logger.info(f"删除了记忆:{description}")
                 print(f"删除了记忆:{description}")
+                return f"删除了记忆:{description}"
             except IndexError:
                 print("提供的索引超出了记忆流的范围。")
+                return f"提供的索引超出了记忆流的范围。"
         elif mode == "all":
             self.memory_stream.clear()  # 清空整个列表
             logger.info("已清空所有记忆。")
             print("已清空所有记忆。")
+            return "已清空所有记忆。"
         elif mode == "search":
             if query:
                 # 搜索匹配的记忆
@@ -192,6 +196,7 @@ class Brain:
                         self.memory_stream.remove(memory)
                         logger.info(f"删除了匹配查询\"{query}\"的记忆：\"{memory['description']}\"")
                         print(f"删除了匹配查询\"{query}\"的记忆：\"{memory['description']}\"")
+                        return f"删除了匹配查询\"{query}\"的记忆：\"{memory['description']}\""
                     except ValueError:
                         print("未能删除记忆，可能已被删除。")
                 else:
@@ -205,7 +210,7 @@ class Brain:
         """展示所有记忆的摘要、创建时间和嵌入向量的大小。"""
         memory_str = ""
         if not self.memory_stream:
-            memory_str = "没有记忆单元"
+            memory_str = "没有记忆单元\n"
             print(memory_str)
             return memory_str
 
@@ -213,7 +218,7 @@ class Brain:
         memory_str += f"记忆条数：{memory_count}\n"
         memory_str += f"{'-' * 40}\n"  # 添加分隔线
 
-        for idx, memory in enumerate(self.memory_stream, 1):
+        for idx, memory in enumerate(self.memory_stream, 0):
             description = memory["description"]
             create_time = memory["create_time"]
             embedding_size = len(memory["embedding"])
@@ -288,25 +293,28 @@ class Brain:
         self.basic_knowledge.append(knowledge)
         logger.info(f"添加了知识：{text}")
 
-    def del_knowledge(self, mode="single", index=0):
+    def del_knowledge(self, index=0, mode="single"):
         """从记忆流中删除指定索引的记忆。"""
         if mode == "single":
             try:
-                text= self.basic_knowledge[index]["text"]
+                text = self.basic_knowledge[index]["text"]
                 del self.basic_knowledge[index]
                 logger.info(f"删除了记忆:{text}")
                 print(f"删除了\"{text}\"")
+                return f"删除了\"{text}\""
             except IndexError:
                 print("提供的索引超出了知识库的范围。")
+                return "提供的索引超出了知识库的范围。"
         elif mode == "all":
             self.basic_knowledge.clear()  # 清空整个列表
             print("已清空所有知识。")
+            return "已清空所有知识。"
 
     def show_knowledge(self):
         """展示所有知识。"""
         knowledge_str = ""
         if not self.basic_knowledge:
-            knowledge_str = "没有知识单元"
+            knowledge_str = "没有知识单元\n"
             print(knowledge_str)
             return knowledge_str
 
@@ -314,7 +322,7 @@ class Brain:
         knowledge_str += f"知识条数：{knowledge_count}\n"
         knowledge_str += f"{'-' * 40}\n"  # 添加分隔线
 
-        for idx, knowledge in enumerate(self.basic_knowledge, 1):
+        for idx, knowledge in enumerate(self.basic_knowledge, 0):
             text = knowledge["text"]
             embedding_size = len(knowledge["embedding"])
             knowledge_str += (
