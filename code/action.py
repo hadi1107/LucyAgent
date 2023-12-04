@@ -1,16 +1,7 @@
 import openai
 import json
-import logging
 import tools
 import apis
-
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    filename='../agent_action.log',  # 指定日志文件的名称
-    filemode='w',  # 'a' 表示追加模式，如果每次运行时都创建新文件，可以使用 'w'
-)
-logger = logging.getLogger(__name__)
 
 class LucyAgent:
     """代表一个具有感知、大脑和行为能力的智能代理。"""
@@ -86,7 +77,6 @@ class Action:
         }
         """
         wiki_object = tools.get_wikipedia_text(search_query)
-        logger.info(f"从{wiki_object['url']}获取了wiki内容：{wiki_object['content']}")
         return wiki_object
 
     # def use_scraper(self,url):

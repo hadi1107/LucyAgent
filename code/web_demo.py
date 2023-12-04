@@ -1,7 +1,7 @@
 import gradio as gr
 import json
 from perception import Perception
-from action import  Action
+from action import Action
 from brain import Brain
 from lucy_agent import LucyAgent
 
@@ -96,42 +96,54 @@ if __name__ == "__main__":
 
                 with gr.Column():
                     def del_memory(memory_index):
-                        memory_str = hutao.brain.del_memory(mode="single", index=memory_index)
-                        save_agent_json(hutao.brain)
-                        return memory_str
+                        memory_str = ""
+                        if isinstance(memory_index, int):
+                            memory_str = hutao.brain.del_memory(mode="single", index=memory_index)
+                            save_agent_json(hutao.brain)
+                        if not memory_index:
+                            memory_str = "下拉菜单为空或没有接收到下拉菜单的值"
+
+                        memory_keys = list(range(len(hutao.brain.memory_stream)))
+                        memory_dropdown = gr.Dropdown(memory_keys, label="选择要删除的记忆序号\U0001F600")
+
+                        return memory_str, memory_dropdown
 
                     memory_keys = list(range(len(hutao.brain.memory_stream)))
-                    gr.Interface(fn=del_memory,
-                                 # title="删除记忆🧠",
-                                 inputs=gr.Dropdown(memory_keys, label="选择要删除的记忆序号\U0001F600"),
-                                 outputs=gr.Textbox(label="已删除的胡桃记忆🧠"),
-                                 allow_flagging="never")
+                    memory_dropdown = gr.Dropdown(memory_keys, label="选择要删除的记忆序号\U0001F600")
+                    memory_deleted = gr.Textbox(label="已删除的胡桃记忆🧠")
+                    button = gr.Button("删除记忆🧠")
+                    button.click(fn=del_memory, inputs=memory_dropdown, outputs=[memory_deleted,memory_dropdown])
 
                     def del_knowledge(knowledge_index):
-                        knowledge_index = int(knowledge_index)
-                        knowledge_str = hutao.brain.del_knowledge(mode="single",index=knowledge_index)
-                        save_agent_json(hutao.brain)
-                        return knowledge_str
+                        knowledge_str = ""
+                        if isinstance(knowledge_index, int):
+                            knowledge_str = hutao.brain.del_knowledge(mode="single",index=knowledge_index)
+                            save_agent_json(hutao.brain)
+                        if not knowledge_str:
+                            knowledge_str = "下拉菜单为空或没有接收到下拉菜单的值"
+
+                        knowledge_keys = list(range(len(hutao.brain.basic_knowledge)))
+                        knowledge_dropdown = gr.Dropdown(knowledge_keys, label="选择要删除的知识序号\U0001F600")
+
+                        return knowledge_str, knowledge_dropdown
 
                     knowledge_keys = list(range(len(hutao.brain.basic_knowledge)))
-                    gr.Interface(fn=del_knowledge,
-                                 # title="删除知识📚",
-                                 inputs=gr.Dropdown(knowledge_keys, label="选择要删除的知识序号\U0001F600"),
-                                 outputs=gr.Textbox(label="已删除的胡桃知识📚"),
-                                 allow_flagging="never")
+                    knowledge_dropdown = gr.Dropdown(knowledge_keys, label="选择要删除的知识序号\U0001F600")
+                    knowledge_deleted = gr.Textbox(label="已删除的胡桃知识📚")
+                    button = gr.Button("删除知识📚")
+                    button.click(fn=del_knowledge, inputs=knowledge_dropdown, outputs=[knowledge_deleted,knowledge_dropdown])
 
 
         with gr.Tab("注入一些知识\U0001F4D6"):
             def split_text_and_add_to_knowledge(content):
                 # 若源内容过长就先切分
-                tokens = len(content)
-                max_tokens = 500
+                max_unit_length = 500
                 splited = False
 
                 # 如果 tokens 数量超过了限制，进行切分处理
-                if tokens > max_tokens:
+                if len(content) > max_unit_length:
                     splited = True
-                    segments = Perception.split_text(content, min_length=max_tokens, buffer_min_length=int(max_tokens*0.3))
+                    segments = Perception.split_text(content, min_length=max_unit_length, buffer_min_length=int(max_unit_length*0.3))
                     pairs = Perception.get_text_embedding_pairs(segments)
                     hutao.brain.add_knowledge_list(pairs)
                     save_agent_json(hutao.brain)
@@ -154,6 +166,23 @@ if __name__ == "__main__":
 
                     return knowledge_str, splited
 
+            def add_knowledge_from_webpage(webpage_content):
+                # 从页面输入获得知识
+                pairs_str, splited = split_text_and_add_to_knowledge(webpage_content)
+
+                if splited:
+                    webpage_str = (f"从页面输入的内容中获得了以下知识:\n\n"
+                                   f"由于知识源文本过长而进行了切分：\n\n{pairs_str}")
+                else:
+                    webpage_str = (f"从页面输入的内容中获得了以下知识:\n\n"
+                                   f"\n\n{pairs_str}")
+                return webpage_str
+
+            gr.Interface(fn=add_knowledge_from_webpage,
+                         inputs=gr.Textbox(label="输入知识文本📝"),
+                         outputs=gr.Textbox(label="从页面输入中提取到的知识📝"),
+                         allow_flagging="never")
+
             def add_knowledge_from_pdf(pdf_path):
                 # 对pdf进行切分，直接加载到知识库
                 pdf_content = hutao.perception.read_pdf(pdf_path)
@@ -168,7 +197,6 @@ if __name__ == "__main__":
                 return pdf_str
 
             gr.Interface(fn=add_knowledge_from_pdf,
-                         title="将PDF文件的知识注入到知识库\U0001F600",
                          inputs=gr.File(label="上传PDF📝"),
                          outputs=gr.Textbox(label="从PDF提取到的知识📝"),
                          allow_flagging="never")
@@ -178,18 +206,17 @@ if __name__ == "__main__":
                 wiki_object = hutao.action.use_wiki(search_query)
                 wiki_url = wiki_object['url']
                 wiki_content = wiki_object['content']
-
                 pairs_str, splited = split_text_and_add_to_knowledge(wiki_content)
+
                 if splited:
-                    wiki_str = (f"基于Wiki的查询:{search_query}\n找到了url:{wiki_url},内容如下："
+                    wiki_str = (f"基于Wiki的查询:{search_query}\n找到了URL:{wiki_url},内容如下："
                                 f"\n\n{wiki_content}\n\n由于知识源文本过长而进行了切分：\n\n{pairs_str}")
                 else:
-                    wiki_str = (f"基于Wiki的查询:{search_query}\n找到了url:{wiki_url},内容如下："
+                    wiki_str = (f"基于Wiki的查询:{search_query}\n找到了URL:{wiki_url},内容如下："
                                 f"\n\n{wiki_content}\n\n{pairs_str}")
                 return wiki_str
 
             gr.Interface(fn=add_knowledge_from_wiki,
-                         title="从Wiki检索知识并注入到知识库\U0001F600",
                          inputs=gr.Textbox(label="搜索Wiki百科📝"),
                          outputs=gr.Textbox(label="从Wiki提取到的知识📝"),
                          allow_flagging="never")

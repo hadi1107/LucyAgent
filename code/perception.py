@@ -1,15 +1,6 @@
 import json
-import logging
 import PyPDF2
 import apis
-
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    filename='../agent_perception.log',  # 指定日志文件的名称
-    filemode='w',  # 'a' 表示追加模式，如果每次运行时都创建新文件，可以使用 'w'
-)
-logger = logging.getLogger(__name__)
 
 class LucyAgent:
     """代表一个具有感知、大脑和行为能力的智能代理。"""
@@ -61,7 +52,6 @@ class Perception:
             return None
 
         # 将所有页面的文本连接成一个字符串并返回
-        logger.info(f"读取了{pdf_path}的内容")
         return '\n'.join(text_content)
 
     @classmethod
@@ -96,6 +86,8 @@ class Perception:
 
             # 如果当前段落达到指定长度，或者已经是最后一句话了，则结束当前段落
             if len(current_segment) >= min_length or (i == len(sentences) - 1):
+                if(i == len(sentences) - 1) and buffer_sentences:
+                    current_segment += buffer_sentences
                 segments.append(current_segment.replace(' ', '').replace('\n', ''))
                 # 如果已经是最后一句话了，就不需要再设置 `cleared_buffer` 了
                 if i < len(sentences) - 1:
