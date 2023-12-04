@@ -1,10 +1,20 @@
 import openai
 import json
+import logging
 import tools
 import apis
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    filename='../agent_action.log',  # 指定日志文件的名称
+    filemode='w',  # 'a' 表示追加模式，如果每次运行时都创建新文件，可以使用 'w'
+)
+logger = logging.getLogger(__name__)
+
 class LucyAgent:
     """代表一个具有感知、大脑和行为能力的智能代理。"""
-    def __init__(self, perception, brain, action, fsm):
+    def __init__(self, perception, brain, action):
         self.perception = perception
         self.brain = brain
         self.action = action
@@ -69,14 +79,21 @@ class Action:
             return message["content"]
 
     def use_wiki(self,search_query):
+        """
+        return {
+            "url":page_url,
+            "content":content
+        }
+        """
         wiki_object = tools.get_wikipedia_text(search_query)
+        logger.info(f"从{wiki_object['url']}获取了wiki内容：{wiki_object['content']}")
         return wiki_object
 
-    def use_scraper(self,url):
-        page_object = tools.scrape_webpage(url)
-        return page_object
-
-    def use_bing(self,query):
-        bing_obejct = apis.bing_search(query)
-        return bing_obejct
+    # def use_scraper(self,url):
+    #     page_object = tools.scrape_webpage(url)
+    #     return page_object
+    #
+    # def use_bing(self,query):
+    #     bing_obejct = apis.bing_search(query)
+    #     return bing_obejct
 

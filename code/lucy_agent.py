@@ -15,5 +15,5 @@ if __name__ == "__main__":
     with open("../resource/hutao.json", "r", encoding="utf-8") as json_file:
         loaded_data = json.load(json_file)
 
-    hutao = LucyAgent(perception=None, brain=Brain.from_json(loaded_data), action=Action())
+    hutao = LucyAgent(perception=Perception(), brain=Brain.from_json(loaded_data), action=Action())
 

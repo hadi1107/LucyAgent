@@ -2,7 +2,6 @@ import time
 import json
 import numpy as np
 import logging
-
 import apis
 from agent_fsm import AgentFSM
 
@@ -11,7 +10,7 @@ MEMORY_LIMIT = 10
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    filename='../agent.log',  # 指定日志文件的名称
+    filename='../agent_brain.log',  # 指定日志文件的名称
     filemode='w',  # 'a' 表示追加模式，如果每次运行时都创建新文件，可以使用 'w'
 )
 logger = logging.getLogger(__name__)
@@ -61,7 +60,6 @@ class Brain:
     @classmethod
     def from_json(cls, json_data):
         """从JSON格式的数据创建Brain实例。"""
-        logger.info(f"按照{json_data}对Brain模块进行了初始化")
         return cls(**json_data)
 
     def show_info(self):
@@ -260,18 +258,17 @@ class Brain:
         logger.info(f"找到了相关记忆：{description}")
         return most_similar_memory
 
-    def extract_knowledge(self,source):
+    @classmethod
+    def extract_knowledge(cls, source):
         """从包含知识的文本中提取知识"""
         summary_prompt = f"""
-角色名称：{self.name}
-初始记忆：{self.seed_memory}
-任务：总结文本中包含的知识点。
-字数限制：不超过100字。
+任务：总结文本中包含的信息或知识点。
+字数限制：不超过500字。
 知识点文本：
 <<<
 {source}
 >>>
-请提供一个准确的、陈述性的知识点总结，不要改变原始内容或添加额外信息。
+请提供一个准确的、陈述性的知识点总结,不要改变原始内容或添加额外信息,不要丢失关键信息。
 """
         summary = apis.chatgpt(summary_prompt)
         logger.info(f"从{source}提取了知识点：{summary}")
@@ -359,7 +356,6 @@ class Brain:
 
         logger.info(f"找到了最相似的知识：{most_similar_knowledge['text']}")
         return most_similar_knowledge
-
 
     def chat(self, input, history):
         query_embedding = apis.embedding(input)[0]
@@ -466,22 +462,7 @@ if __name__ == "__main__":
     hutao = LucyAgent(perception=None, brain=Brain.from_json(loaded_data), action=None)
 
     # 打印状态
-    hutao.brain.del_memory()
-    hutao.brain.del_knowledge(mode="all")
-    hutao.brain.show_info()
-
-    # history = None
-    # hutao.brain.chat("胡桃可以给我来一杯咖啡吗？",history)
-    # 结果：
-    # 胡桃: 当然可以！请问您喜欢什么口味的咖啡呢？我们这里有各种不同的选择。
-
-
-    # history = None
-    # hutao.brain.cot_chat("胡桃可以给我来一杯咖啡吗？",history)
-    # 结果：
-    # 我在思考对方的请求是否合适。作为往生堂的堂主，我应该保持礼貌并尽力帮助他人。但是，作为一名读书人，我也需要专注于我的学习。
-    # 或许我可以告诉他我正在读书，并询问他是否还需要其他帮助。这样既能满足他的需求，也不会打断我的学习。
-    # 胡桃: 哈迪，你好！很抱歉，我现在正在读书，可能无法立即为你泡咖啡。不过我可以告诉你，我在往生堂经营一家咖啡店，提供一些饮品和小食。如果你还需要其他帮助，我会尽力满足你的需求。
+    print(hutao.brain.show_info())
 
     # 将更新后的大脑状态保存到JSON文件中。
     try:

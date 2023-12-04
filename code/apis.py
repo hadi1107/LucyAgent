@@ -6,7 +6,9 @@ import re
 import json
 import openai
 import requests
+import tiktoken
 
+encoding = tiktoken.encoding_for_model("gpt-3.5-turbo")
 openai.api_key = os.getenv('OPENAI_API_KEY')
 tts_api_key = os.getenv('TTS_API_KEY')
 bing_api_key = os.getenv('BING_API_KEY')
@@ -86,6 +88,11 @@ def embedding(things:list or str) -> list:
     except Exception as e:
         print(f"An error occurred: {e}")
         return f"An error occurred: {e}"
+
+def tokens(text):
+    num_tokens = len(encoding.encode(text))
+    print("Token count:", num_tokens)
+    return num_tokens
 
 def genshin_tts(text:str, speaker:str) -> str:
     """

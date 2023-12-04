@@ -1,6 +1,15 @@
 import json
+import logging
 import PyPDF2
 import apis
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    filename='../agent_perception.log',  # 指定日志文件的名称
+    filemode='w',  # 'a' 表示追加模式，如果每次运行时都创建新文件，可以使用 'w'
+)
+logger = logging.getLogger(__name__)
 
 class LucyAgent:
     """代表一个具有感知、大脑和行为能力的智能代理。"""
@@ -14,7 +23,8 @@ class Perception:
     def __init__(self):
         pass
 
-    def read_pdf(self,pdf_path):
+    @classmethod
+    def read_pdf(cls, pdf_path):
         """
         读取 PDF 文件并返回其文本内容。
 
@@ -51,14 +61,19 @@ class Perception:
             return None
 
         # 将所有页面的文本连接成一个字符串并返回
+        logger.info(f"读取了{pdf_path}的内容")
         return '\n'.join(text_content)
 
-    def split_text(self, text, min_length=500, buffer_min_length=150):
-        # 初始化变量
+    @classmethod
+    def split_text(cls, text, min_length=500, buffer_min_length=150):
+        """带上下文buffer的文本切分"""
+        if len(text) < min_length:
+            return [text]
+
         segments = []
         current_segment = ''
         buffer_sentences = ''
-        cleard_buffer = ''
+        cleared_buffer = ''
 
         # 将文本按句子分割
         sentences = text.split('。')
@@ -76,23 +91,25 @@ class Perception:
                 # 将缓冲区句子添加到当前段落
                 current_segment += buffer_sentences
                 # 清空缓冲区句子
-                cleard_buffer = buffer_sentences
+                cleared_buffer = buffer_sentences
                 buffer_sentences = ''
 
-            # 如果当前段落达到指定长度，则结束当前段落
-            if len(current_segment) >= min_length:
-                # 将当前段落添加到段落列表
-                segments.append(current_segment.replace(' ','').replace('\n',''))
-                # 重置当前段落为最后一句
-                current_segment = cleard_buffer
+            # 如果当前段落达到指定长度，或者已经是最后一句话了，则结束当前段落
+            if len(current_segment) >= min_length or (i == len(sentences) - 1):
+                segments.append(current_segment.replace(' ', '').replace('\n', ''))
+                # 如果已经是最后一句话了，就不需要再设置 `cleared_buffer` 了
+                if i < len(sentences) - 1:
+                    current_segment = cleared_buffer
+                else:
+                    current_segment = ''
 
-        # 确保最后一个段落被添加，即使它没有达到最小长度
         if current_segment:
-            segments.append(current_segment.strip())
+            segments.append(current_segment.replace(' ', '').replace('\n', ''))
 
         return segments
 
-    def get_text_embedding_pairs(self,segments):
+    @classmethod
+    def get_text_embedding_pairs(cls, segments):
         """获取text_embedding对的列表"""
         embeddings = apis.embedding(segments)
         pairs = []
@@ -112,10 +129,9 @@ if __name__ == "__main__":
     perception = Perception()
     pdf_text = perception.read_pdf('../resource/zzz.pdf')
     segments = perception.split_text(pdf_text)
-    pairs = perception.get_text_embedding_pairs(segments)
     # 打印分割后的段落
-    for pair in pairs:
-        print(pair)
+    for segment in segments:
+        print(segment)
         print("------")
 
 
