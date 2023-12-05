@@ -32,18 +32,26 @@ class LucyAgent:
 
 class Brain:
     """代表智能代理的大脑，负责记忆和知识处理。"""
-    def __init__(self, name, seed_memory, language_style, basic_knowledge, memory_stream, mood_list, emoji_list):
+    def __init__(self, name, seed_memory, language_style,
+                 mood_list, emoji_list, action_state_list,
+                 basic_knowledge, memory_stream):
+
+        # 结构性超参数（不放在实例化agent的内容json中，代码定义）
+        self.memory_limit = MEMORY_LIMIT
+
+        # 静态属性
         self.name = name
         self.seed_memory = seed_memory
         self.language_style = language_style
-        self.basic_knowledge = basic_knowledge
-
-        self.memory_stream = memory_stream
-        self.memory_limit = MEMORY_LIMIT
-
         self.mood_list = mood_list
         self.emoji_list = emoji_list
-        self.fsm = AgentFSM("开心",mood_list,emoji_list)
+        self.action_state_list = action_state_list
+
+        # 动态属性，注意到mood的初始化是固定的
+        self.basic_knowledge = basic_knowledge
+        self.memory_stream = memory_stream
+        self.fsm = AgentFSM(initial_mood=mood_list[0],initial_action_state=action_state_list[0],
+                            mood_list=mood_list, emoji_list=emoji_list, action_state_list=action_state_list)
 
     def to_json(self):
         """将大脑的状态转换为JSON格式的字典。"""
@@ -51,10 +59,11 @@ class Brain:
             "name": self.name,
             "seed_memory": self.seed_memory,
             "language_style": self.language_style,
+            "mood_list": self.mood_list,
+            "emoji_list": self.emoji_list,
+            "action_state_list": self.action_state_list,
             "basic_knowledge": self.basic_knowledge,
             "memory_stream": self.memory_stream,
-            "mood_list":self.mood_list,
-            "emoji_list": self.emoji_list
         }
 
     @classmethod
@@ -63,17 +72,21 @@ class Brain:
         return cls(**json_data)
 
     def show_info(self):
-        # 创建一个描述大脑状态的字符串
+        """创建一个描述大脑状态的字符串"""
         info = f"静态的Brain Info:\n"
         info += f"Name: {self.name}\n\n"
         info += f"Seed Memory: {self.seed_memory}\n\n"
         info += f"Language Style(使用问候的对话作为对话基调): \n{self.language_style}\n\n"
-        info += f"Memory Limit: {self.memory_limit}\n\n"
         info += f"Mood List: {self.mood_list}\n\n"
         info += f"Emoji List: {self.emoji_list}\n\n"
+        info += f"Action State List: {self.action_state_list}\n\n"
+
         info += f"动态的Brain Info:\n"
         info += f"Mood: {self.fsm.mood}\n\n"
+        info += f"Action State: {self.fsm.action_state}\n\n"
+
         info += self.show_knowledge()
+        info += f"Memory Limit: {self.memory_limit}\n\n"
         info += self.show_memory()
         logger.info(f"打印了Brain模块的相关信息：{info}")
         return info

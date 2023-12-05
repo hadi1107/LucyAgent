@@ -28,7 +28,7 @@ def save_agent_json(agent_brain):
 
 if __name__ == "__main__":
     # 用初始json进行初始化
-    with open("../resource/胡桃.json", "r", encoding="utf-8") as json_file:
+    with open("../resource/hutao.json", "r", encoding="utf-8") as json_file:
         loaded_data = json.load(json_file)
 
     perception = Perception()
@@ -104,12 +104,12 @@ if __name__ == "__main__":
                             memory_str = "下拉菜单为空或没有接收到下拉菜单的值"
 
                         memory_keys = list(range(len(hutao.brain.memory_stream)))
-                        memory_dropdown = gr.Dropdown(memory_keys, label="选择要删除的记忆序号\U0001F600")
+                        memory_dropdown = gr.Dropdown(memory_keys, label="要删除的记忆序号\U0001F600")
 
                         return memory_str, memory_dropdown
 
                     memory_keys = list(range(len(hutao.brain.memory_stream)))
-                    memory_dropdown = gr.Dropdown(memory_keys, label="选择要删除的记忆序号\U0001F600")
+                    memory_dropdown = gr.Dropdown(memory_keys, label="要删除的记忆序号\U0001F600")
                     memory_deleted = gr.Textbox(label="已删除的胡桃记忆🧠")
                     button = gr.Button("删除记忆🧠")
                     button.click(fn=del_memory, inputs=memory_dropdown, outputs=[memory_deleted,memory_dropdown])
@@ -123,26 +123,25 @@ if __name__ == "__main__":
                             knowledge_str = "下拉菜单为空或没有接收到下拉菜单的值"
 
                         knowledge_keys = list(range(len(hutao.brain.basic_knowledge)))
-                        knowledge_dropdown = gr.Dropdown(knowledge_keys, label="选择要删除的知识序号\U0001F600")
+                        knowledge_dropdown = gr.Dropdown(knowledge_keys, label="要删除的知识序号\U0001F600")
 
                         return knowledge_str, knowledge_dropdown
 
                     knowledge_keys = list(range(len(hutao.brain.basic_knowledge)))
-                    knowledge_dropdown = gr.Dropdown(knowledge_keys, label="选择要删除的知识序号\U0001F600")
+                    knowledge_dropdown = gr.Dropdown(knowledge_keys, label="要删除的知识序号\U0001F600")
                     knowledge_deleted = gr.Textbox(label="已删除的胡桃知识📚")
                     button = gr.Button("删除知识📚")
                     button.click(fn=del_knowledge, inputs=knowledge_dropdown, outputs=[knowledge_deleted,knowledge_dropdown])
-
 
         with gr.Tab("注入一些知识\U0001F4D6"):
             def split_text_and_add_to_knowledge(content):
                 # 若源内容过长就先切分
                 max_unit_length = 500
-                splited = False
+                split = False
 
                 # 如果 tokens 数量超过了限制，进行切分处理
                 if len(content) > max_unit_length:
-                    splited = True
+                    split = True
                     segments = Perception.split_text(content, min_length=max_unit_length, buffer_min_length=int(max_unit_length*0.3))
                     pairs = Perception.get_text_embedding_pairs(segments)
                     hutao.brain.add_knowledge_list(pairs)
@@ -155,7 +154,7 @@ if __name__ == "__main__":
                                       f"嵌入向量大小:{len(pair['embedding'])}\n"
                                       f"{'-' * 40}\n")
 
-                    return pairs_str, splited
+                    return pairs_str, split
 
                 else:
                     knowledge = hutao.brain.add_knowledge_from_text(content)
@@ -164,13 +163,13 @@ if __name__ == "__main__":
                                      f"嵌入向量大小:{len(knowledge['embedding'])}\n"
                                      f"{'-' * 40}\n")
 
-                    return knowledge_str, splited
+                    return knowledge_str, split
 
             def add_knowledge_from_webpage(webpage_content):
                 # 从页面输入获得知识
-                pairs_str, splited = split_text_and_add_to_knowledge(webpage_content)
+                pairs_str, split = split_text_and_add_to_knowledge(webpage_content)
 
-                if splited:
+                if split:
                     webpage_str = (f"从页面输入的内容中获得了以下知识:\n\n"
                                    f"由于知识源文本过长而进行了切分：\n\n{pairs_str}")
                 else:
@@ -186,9 +185,9 @@ if __name__ == "__main__":
             def add_knowledge_from_pdf(pdf_path):
                 # 对pdf进行切分，直接加载到知识库
                 pdf_content = hutao.perception.read_pdf(pdf_path)
-                pairs_str, splited = split_text_and_add_to_knowledge(pdf_content)
+                pairs_str, split = split_text_and_add_to_knowledge(pdf_content)
 
-                if splited:
+                if split:
                     pdf_str = (f"基于PDF:{pdf_path}加载了如下内容:\n\n{pdf_content}"
                                f"由于知识源文本过长而进行了切分：\n\n{pairs_str}")
                 else:
@@ -206,9 +205,9 @@ if __name__ == "__main__":
                 wiki_object = hutao.action.use_wiki(search_query)
                 wiki_url = wiki_object['url']
                 wiki_content = wiki_object['content']
-                pairs_str, splited = split_text_and_add_to_knowledge(wiki_content)
+                pairs_str, split = split_text_and_add_to_knowledge(wiki_content)
 
-                if splited:
+                if split:
                     wiki_str = (f"基于Wiki的查询:{search_query}\n找到了URL:{wiki_url},内容如下："
                                 f"\n\n{wiki_content}\n\n由于知识源文本过长而进行了切分：\n\n{pairs_str}")
                 else:

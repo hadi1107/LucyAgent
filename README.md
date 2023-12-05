@@ -2,16 +2,24 @@
 
 ## 🎉 基本介绍
 
+### 💬页面一览
+
+![示例图片](./markdown/talk.png)
+
+![示例图片](./markdown/manage.png)
+
+![示例图片](./markdown/knowledge.png)
+
 ## 🌟 主要特性
-- 🧠 基于Perception, Brain, Action的框架
+- 🧠 基于Perception， Brain， Action的框架
 - 📚 记忆流与知识库
 - 📝 处理PDF
 - 🔧 工具库（例如Wiki检索）
-- 🎮 使用LLM驱动FSM（例如心情）
-- ✍️ 清晰的prompt设计
+- 🎮 使用LLM驱动FSM（例如心情，行为）
+- ✍️ 充分 & 清晰的prompt设计
 - 🎨 Gradio交互
 - 🚫 不依赖LangChain
-- 🚫 无本地模型，基于API调用实现
+- 🚫 无本地模型部署，模型基于API调用实现
 
 ## 🧠 Brain模块
 

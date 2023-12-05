@@ -8,10 +8,12 @@ class LucyAgent:
         self.action = action
 
 class AgentFSM:
-    def __init__(self, initial_mood, mood_list, emoji_list):
+    def __init__(self, initial_mood, initial_action_state, mood_list, emoji_list,action_state_list):
         self.mood = initial_mood
+        self.action_state = initial_action_state
         self.mood_list = mood_list
         self.emoji_list = emoji_list
+        self.action_state_list = action_state_list
 
     def mood_transition(self, trigger, thought):
         new_mood = self.determine_mood_transition(trigger, thought)
