@@ -250,7 +250,7 @@ if __name__ == "__main__":
 
                 if split:
                     pdf_str = (f"基于PDF:{pdf_path}加载了如下内容:\n\n{pdf_content}"
-                               f"由于知识源文本过长而进行了切分：\n\n{pairs_str}")
+                               f"\n\n由于知识源文本过长而进行了切分：\n\n{pairs_str}")
                 else:
                     pdf_str = (f"基于PDF:{pdf_path}加载了如下内容:\n\n{pdf_content}"
                                f"\n\n{pairs_str}")

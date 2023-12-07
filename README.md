@@ -3,6 +3,9 @@
 ## 🎉 基本介绍
 
 ### 💬 Gradio Demo一览
+![示例图片](./markdown/interact.png)
+
+![示例图片](./markdown/talk_empty.png)
 
 ![示例图片](./markdown/talk.png)
 
