@@ -2,7 +2,7 @@
 
 ## 🎉 基本介绍
 
-### 💬页面一览
+### 💬 Gradio Demo一览
 
 ![示例图片](./markdown/talk.png)
 
@@ -12,14 +12,13 @@
 
 ## 🌟 主要特性
 - 🧠 基于Perception， Brain， Action的框架
-- 📚 记忆流与知识库
-- 📝 处理PDF
-- 🔧 工具库（例如Wiki检索）
+- 📚 可交互的记忆流与知识库
+- 🔧 工具库（例如Wiki检索，处理PDF📝）
 - 🎮 使用LLM驱动FSM（例如心情，行为）
 - ✍️ 充分 & 清晰的prompt设计
-- 🎨 Gradio交互
+- 🎨 Gradio Demo
 - 🚫 不依赖LangChain
-- 🚫 无本地模型部署，模型基于API调用实现
+- 🚫 模型部署基于API调用实现，易改装
 
 ## 🧠 Brain模块
 
@@ -70,6 +69,7 @@ knowledge = {
 - 💬 `language_style`: 角色的语言风格。
 - 🧠 `basic_knowledge`: 角色的基础知识，初始为空数组。
 - 📚 `memory_stream`: 角色的记忆流，初始为空数组。
-- 😄 `mood_list`: fsm的可能状态列表。
-- 😃 `emoji_list`: fsm状态对应的表情包列表。
+- 😄 `mood_list`: 角色fsm的可能心情列表。
+- 😃 `emoji_list`: 角色fsm心情对应的表情包列表。
+- 🕵️‍♀️ `action_state_list`:角色fsm的可能行动列表。
 

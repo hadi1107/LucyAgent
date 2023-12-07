@@ -1,9 +1,22 @@
 import gradio as gr
 import json
+import apis
 from perception import Perception
 from action import Action
 from brain import Brain
 from lucy_agent import LucyAgent
+
+# 理论上应该从perception的一些传感器接收到一些传感数据，然后再转为自然语言描述用于驱动状态转移
+# 假设perception可以获得时间，视觉（周边感知），专有接口（比如玩家摁键要打招呼，发了短信等等）
+# 根据状态不同，perception能收到的信息也不同,并且action理论上是“准备去做“而不是已经在做了
+# 作为模拟，直接给出一些场景可能的自然语言描述，并直接切换状态，因为重点在于测试LLM基于感知描述进行决策的能力
+
+EVENTS_LIST = [
+    "胡桃看到了hadi在往生堂门口,听到了hadi在打招呼。",
+    "胡桃收到璃月管委会的消息,内容为：往生堂第七十七代堂主，您好。近来璃月要举行一场特别的送别之仪，请您着手策划。",
+    "胡桃从对话中了解到，hadi点了一杯拿铁。",
+    "胡桃听到自己的闹钟响了，查看后发现备注为：记得看看璃月的历史书！"
+]
 
 def save_to_file(file_path:str, conversations)-> None:
     with open(file_path, 'w', encoding='utf-8') as f:
@@ -37,17 +50,63 @@ if __name__ == "__main__":
 
     # 创建一个 Gradio 界面
     with gr.Blocks() as demo:
+
         # 创建一个状态对象，用于存储历史记录
         state = gr.State([])
 
+        with gr.Tab("和胡桃互动！\U0001F917"):
+            def show_action_state():
+                scene_path = ""
+                if hutao.brain.fsm.action_state == "休息":
+                    scene_path = "../resource/pictures/hutao_xiuxi.webp"
+                if hutao.brain.fsm.action_state == "看书":
+                    scene_path = "../resource/pictures/hutao_kanshu.webp"
+                if hutao.brain.fsm.action_state == "策划往生堂相关活动":
+                    scene_path = "../resource/pictures/hutao_cehua.jpg"
+                if hutao.brain.fsm.action_state == "做咖啡并递交给客户":
+                    scene_path = "../resource/pictures/hutao_coffee.jpg"
+                if hutao.brain.fsm.action_state == "回复问题和聊天":
+                    scene_path = "../resource/pictures/hutao_yao.webp"
+                return f"胡桃正在{hutao.brain.fsm.action_state}", scene_path
 
-        with gr.Tab("和胡桃对话！\U0001F917"):
-            def talk_with_hutao(input, history=None):
+            def perceive_and_change_action(trigger):
+                if not trigger:
+                    return "下拉菜单为空或没有接收到下拉菜单的值", "../resource/pictures/hutao_naohuo.webp"
+                old_action_state = hutao.brain.fsm.action_state
+                thought = hutao.brain.create_thought_from_perception(trigger)
+                hutao.brain.fsm.action_state_transition(trigger, thought)
+                action_state_str, scene_path = show_action_state()
+                action_state_str = (f"胡桃原先正在{old_action_state},因为{trigger}胡桃认为:{thought}"
+                                    f"\n\n因而决定{hutao.brain.fsm.action_state}")
+
+                memory = hutao.brain.create_memory(trigger, f"胡桃进行了思考：{thought}")
+                hutao.brain.add_memory(memory)
+                save_agent_json(hutao.brain)
+
+                print(action_state_str)
+                return action_state_str, scene_path
+
+            state_box = gr.Textbox(label="胡桃的行动情况🚴‍♂️")
+            image_box = gr.Image(label="胡桃正在干什么？\U0001F60A", height=300)
+            query_button = gr.Button("查询胡桃的行动情况🤶")
+            query_button.click(show_action_state, inputs=[], outputs=[state_box, image_box])
+
+            events_dropdown = gr.Dropdown(choices=EVENTS_LIST, label="可以模拟的事件列表🧐")
+            event_button = gr.Button("模拟一些事件的发生⚡")
+            event_button.click(perceive_and_change_action, inputs=events_dropdown, outputs=[state_box, image_box])
+
+        with gr.Tab("和胡桃对话！🥳"):
+            def talk_with_hutao(query, history=None):
+                if hutao.brain.fsm.action_state != "回复问题和聊天":
+                    action_state_str, scene_path = show_action_state()
+                    return f"{action_state_str},没法回复你嘞，请去第一个标签页改变胡桃状态", "../resource/audios/这是一段测试音频哟.wav", scene_path
+                if not query:
+                    return f"请不要不说话嘞", "../resource/audios/这是一段测试音频哟.wav", "../resource/pictures/hutao_naohuo.webp"
                 if history is None:
                     history = []
-                response, history, thought = hutao.brain.cot_chat(input, history)
+                response, history, thought = hutao.brain.cot_chat(query, history)
 
-                input = f"收到了来自hadi的询问：{input}"
+                input = f"胡桃收到了来自hadi的询问：{query}"
                 output = f"进行了思考：{thought},做出了回复：{response}"
                 memory = hutao.brain.create_memory(input,output)
                 hutao.brain.add_memory(memory)
@@ -62,9 +121,11 @@ if __name__ == "__main__":
                 image_path = hutao.brain.fsm.get_current_emoji()
 
                 # 生成响应的音频
-                default_audio_path = "../resource/audios/这是一段测试音频哟.wav"
-                # audio_file_path = apis.genshin_tts(text=response.lstrip("胡桃:"), speaker="胡桃")
-                audio_file_path = default_audio_path
+                audio_file_path = apis.genshin_tts(text=response.lstrip("胡桃:"), speaker="胡桃")
+
+                if audio_file_path == "Error":
+                    default_audio_path = "../resource/audios/这是一段测试音频哟.wav"
+                    audio_file_path = default_audio_path
 
                 save_agent_json(hutao.brain)
 

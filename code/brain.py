@@ -88,10 +88,11 @@ class Brain:
         info += self.show_knowledge()
         info += f"Memory Limit: {self.memory_limit}\n\n"
         info += self.show_memory()
+
         logger.info(f"打印了Brain模块的相关信息：{info}")
         return info
 
-    def create_memory(self, input, output):
+    def create_memory(self, perception, output):
         """根据输入和输出创建一个记忆摘要，并返回记忆字典。"""
         summary_prompt = f"""
 角色名称：{self.name}
@@ -100,12 +101,12 @@ class Brain:
 字数限制：不超过100字。
 事件描述：
 <<<
-输入信息：{input}
-行为输出：{output}
+{self.name}感知到的信息：{perception}
+{self.name}的行为：{output}
 >>>
-请提供一个简洁、陈述性的总结，不要修改事件的实际内容或添加额外信息。
+请提供一个简洁，陈述性的总结，不要添加额外格式，不要修改事件的实际内容或添加额外信息。
 """
-        summary = apis.chatgpt(summary_prompt)  # 假设这个函数调用返回一个字符串摘要。
+        summary = apis.chatgpt(summary_prompt,0.5)  # 假设这个函数调用返回一个字符串摘要。
         embedding_list = apis.embedding(summary)  # 假设这个函数调用返回一个嵌入向量。
         time_string = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         memory = {
@@ -121,12 +122,13 @@ class Brain:
         self.memory_stream.append(memory)
         description = memory["description"]
         logger.info(f"添加了新记忆：{description}")
-        # 检查记忆流是否达到上限
+        # 检查记忆流是否达到上限，到达后就做总结
         if len(self.memory_stream) == self.memory_limit:
             self.summarize_memory()
 
 
     def summarize_memory(self):
+        """以最新的记忆为标准，找到与其最语气相似的记忆对象，进行一次总结"""
         embeddings = np.array([memory['embedding'] for memory in self.memory_stream[:-1]])
         latest_embedding = self.memory_stream[-1]['embedding']
 
@@ -161,7 +163,7 @@ class Brain:
 请以第一人称视角编写一个高语义层次的总结，不要改变原始记忆的内容或添加额外信息。
 """
         print(summary_prompt)
-        summary = apis.chatgpt(summary_prompt)  # 假设这个函数调用返回一个字符串摘要。
+        summary = apis.chatgpt(summary_prompt, 0.5)  # 假设这个函数调用返回一个字符串摘要。
         print(summary)
         logger.info(f"从记忆子集：{descriptions_to_summarize}\n总结了相关记忆：{summary}")
         embedding_list = apis.embedding(summary)  # 假设这个函数调用返回一个嵌入向量。
@@ -283,7 +285,7 @@ class Brain:
 >>>
 请提供一个准确的、陈述性的知识点总结,不要改变原始内容或添加额外信息,不要丢失关键信息。
 """
-        summary = apis.chatgpt(summary_prompt)
+        summary = apis.chatgpt(summary_prompt, 0.3)
         logger.info(f"从{source}提取了知识点：{summary}")
         return summary
 
@@ -399,18 +401,37 @@ class Brain:
 """
         print(prompt)
         logger.info(f"生成了对话提示：{prompt}")
-        response = apis.chatgpt(prompt)
+        response = apis.chatgpt(prompt,1.0)
         print(response)
         logger.info(f"生成了回复：{response}")
         history.append(f"{response}")
         return response, history
 
-    def create_thought(self, memory, knowledge, context):
+    def create_thought_from_perception(self, trigger):
+        prompt = f"""
+角色名称：{self.name}
+初始记忆：{self.seed_memory}
+任务：分析角色感知到的信息，基于角色视角(第一视角，我应该如何？)进行思考，包含对角色相关事件的判断和角色的心理反应。
+字数限制：不超过100字。
+感知到的信息：
+<<<
+{trigger}
+>>>
+请仅返回思考内容，不要添加额外信息或格式。
+"""
+        print(prompt)
+        logger.info(f"生成了思考提示：{prompt}")
+        thought = apis.chatgpt(prompt,1.0)
+        print(thought)
+        logger.info(f"生成了思考内容：{thought}")
+        return thought
+
+    def create_thought_from_query(self, memory, knowledge, context):
         prompt = f"""
 角色名称：{self.name}
 初始记忆：{self.seed_memory}
 当前心情：{self.fsm.mood}
-任务：进行内心思考并返回内容。
+任务：根据对话上下文和辅助信息，基于角色视角(第一视角，我应该如何？)进行思考，包含对角色相关事件的判断和角色的心理反应。
 字数限制：不超过100字。
 辅助信息：相关记忆：“{memory['description']}” 相关知识：“{knowledge['text']}”
 对话上下文：
@@ -422,7 +443,7 @@ class Brain:
 """
         print(prompt)
         logger.info(f"生成了思考提示：{prompt}")
-        thought = apis.chatgpt(prompt)
+        thought = apis.chatgpt(prompt,1.0)
         print(thought)
         logger.info(f"生成了思考内容：{thought}")
         return thought
@@ -439,7 +460,7 @@ class Brain:
 
         memory = self.search_memory(query_embedding)
         knowledge = self.search_knowledge(query_embedding)
-        thought = self.create_thought(memory, knowledge, context)
+        thought = self.create_thought_from_query(memory, knowledge, context)
 
         prompt = f"""
 角色名称：{self.name}
@@ -457,7 +478,7 @@ class Brain:
 """
         print(prompt)
         logger.info(f"生成了对话提示：{prompt}")
-        response = apis.chatgpt(prompt)
+        response = apis.chatgpt(prompt,1.0)
         print(response)
         logger.info(f"生成了回复：{response}")
         history.append(f"{response}")

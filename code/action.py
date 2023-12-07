@@ -15,7 +15,7 @@ class Action:
     def __init__(self):
         pass
 
-    def chatgpt_function(self,prompt: str):
+    def chatgpt_function(self, prompt: str):
         """
         使用chatgpt的function call功能
 

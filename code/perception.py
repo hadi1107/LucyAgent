@@ -10,20 +10,20 @@ class LucyAgent:
         self.action = action
 
 class Perception:
-    """代表智能代理的感知能力。当前未实现具体功能。"""
+    """代表智能代理的感知能力。"""
     def __init__(self):
         pass
 
     @classmethod
     def read_pdf(cls, pdf_path):
         """
-        读取 PDF 文件并返回其文本内容。
+        读取PDF文件并返回其文本内容。
 
         参数:
-        pdf_path: PDF 文件的路径。
+        pdf_path: PDF文档的文件路径。
 
         返回:
-        一个包含 PDF 文件所有页面文本的字符串。
+        一个包含PDF文档所有页面文本的字符串。
         """
         text_content = []
 
@@ -56,7 +56,17 @@ class Perception:
 
     @classmethod
     def split_text(cls, text, min_length=500, buffer_min_length=150):
-        """带上下文buffer的文本切分"""
+        """
+        将文本分割成带有上下文缓冲区的多个段落，确保连贯性。
+
+        参数:
+        text: 需要分割的输入文本。
+        min_length: 每个文本段落的最小长度。
+        buffer_min_length: 上下文缓冲区的最小长度。
+
+        返回:
+        一个文本段落的列表。
+        """
         if len(text) < min_length:
             return [text]
 
@@ -102,29 +112,27 @@ class Perception:
 
     @classmethod
     def get_text_embedding_pairs(cls, segments):
-        """获取text_embedding对的列表"""
+        """
+        获取text_embedding对的列表
+
+        参数:
+        segments: 文本段落的列表。
+
+        返回:
+        包含文本和嵌入向量配对的列表。
+        """
         embeddings = apis.embedding(segments)
         pairs = []
         for i in range(len(segments)):
             text_embedding_pair = {
-                "text":segments[i],
-                "embedding":embeddings[i]
+                "text": segments[i],
+                "embedding": embeddings[i]
             }
             pairs.append(text_embedding_pair)
 
         with open("../resource/pairs.json","w",encoding="utf-8") as f:
-            json.dump(pairs,f,indent=4, ensure_ascii=False)
+            json.dump(pairs, f, indent=4, ensure_ascii=False)
 
         return pairs
-
-if __name__ == "__main__":
-    perception = Perception()
-    pdf_text = perception.read_pdf('../resource/zzz.pdf')
-    segments = perception.split_text(pdf_text)
-    # 打印分割后的段落
-    for segment in segments:
-        print(segment)
-        print("------")
-
 
 

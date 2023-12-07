@@ -13,7 +13,11 @@ openai.api_key = os.getenv('OPENAI_API_KEY')
 tts_api_key = os.getenv('TTS_API_KEY')
 bing_api_key = os.getenv('BING_API_KEY')
 
-def chatgpt(prompt:str) -> str:
+# easygpt接入点
+# openai.api_base = "https://chat.eqing.tech/v1/chat/completions"
+# openai.api_key = "NDAzNmJmMmItYmZhZC00ZDNjLTg5ZWItMjEzYjVmMmZmYTJi"
+
+def chatgpt(prompt:str, temperature = 0.8) -> str:
     """
     使用OpenAI的GPT-3.5-turbo模型进行聊天。
 
@@ -29,8 +33,8 @@ def chatgpt(prompt:str) -> str:
             messages=[
                 {"role": "user", "content": prompt}
             ],
-            timeout = 10,  # 设置请求超时时间为10秒
-            temperature=0.8,  # 控制输出的随机性，值越高输出越随机，值越低输出越确定
+            timeout=10,  # 设置请求超时时间为10秒
+            temperature=temperature,  # 控制输出的随机性，值越高输出越随机，值越低输出越确定
         )
         response = completion.choices[0].message["content"]
         return response
@@ -143,6 +147,7 @@ def genshin_tts(text:str, speaker:str) -> str:
             return audio_file_path
         else:
             print("Error: ", response.status_code)
+            return "Error"
     except requests.exceptions.Timeout:
         print("Timeout occurred")
     except Exception as e:
@@ -202,3 +207,5 @@ def bing_search(query: str, mkt: str = "zh-CN") -> list:
         print(f"An error occurred: {e}")
         return f"An error occurred: {e}"
 
+if __name__ == "__main__":
+    audio_file_path = genshin_tts("我不在！有事请留言哟","胡桃")
