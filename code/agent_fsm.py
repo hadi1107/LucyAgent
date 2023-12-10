@@ -9,8 +9,11 @@ class LucyAgent:
 
 class AgentFSM:
     def __init__(self, initial_mood, initial_action_state, mood_list, emoji_list, action_state_list):
+        # 状态
         self.mood = initial_mood
         self.action_state = initial_action_state
+
+        # 可转移的静态列表和资源路径
         self.mood_list = mood_list
         self.emoji_list = emoji_list
         self.action_state_list = action_state_list
@@ -67,7 +70,7 @@ class AgentFSM:
         # 构造中文提示文本
         action_state_transition_prompt = f"""
 任务：推理角色的下一个行动应该是什么。下一个行动可以是不变的。下面有一个例子给你作为参考，实际推理和例子无关。
-例如：胡桃当前正在策划往生堂相关活动。胡桃从对话中了解到，hadi点了一杯拿铁。胡桃认为：作为咖啡店的经营者，我的第一反应是确保咖啡店能够顺利提供给hadi他所点的拿铁。结合起来，应当输出的下一步行动为："做咖啡并递交给hadi"。
+例如：胡桃当前正在策划往生堂相关活动。胡桃从对话中了解到，hadi点了一杯拿铁。胡桃认为：作为咖啡店的经营者，我的第一反应是确保咖啡店能够顺利提供给hadi他所点的拿铁。结合起来，应当输出的下一步行动为："做咖啡并递交给客户"。
 <<<
 角色当前行动状态：{self.action_state}
 观察到的事件：{trigger}

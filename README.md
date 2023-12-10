@@ -21,7 +21,7 @@
 - ✍️ 充分 & 清晰的prompt设计
 - 🎨 Gradio Demo
 - 🚫 不依赖LangChain
-- 🚫 模型部署基于API调用实现，易改装
+- 🚫 模型调用基于API调用实现，无本地部署
 
 ## 🧠 Brain模块
 

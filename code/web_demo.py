@@ -6,16 +6,29 @@ from action import Action
 from brain import Brain
 from lucy_agent import LucyAgent
 
-# 理论上应该从perception的一些传感器接收到一些传感数据，然后再转为自然语言描述用于驱动状态转移
-# 假设perception可以获得时间，视觉（周边感知），专有接口（比如玩家摁键要打招呼，发了短信等等）
-# 根据状态不同，perception能收到的信息也不同,并且action理论上是“准备去做“而不是已经在做了
-# 作为模拟，直接给出一些场景可能的自然语言描述，并直接切换状态，因为重点在于测试LLM基于感知描述进行决策的能力
+# 本来应该是提供一些物件的接口供agent查询或感知，然后再转化成这种自然语言描述。
+# 比如胡桃本身有一个位置属性，在往生堂，就应该感知不到咖啡店那边的信息。
+# 但总的来说，决策还是基于自然语言去做，因而可以这样模拟。
+# 拒绝回答和行动的能力同样重要。
+# 可以拆分成:xx事件发生,然后根据胡桃的状态和位置判断逻辑 -> 自然语言描述
+# 比如：
+# "咖啡店前台信息传来：hadi点了一杯拿铁","胡桃在往生堂" -> 不触发，返回胡桃没感觉到
+# "hadi在往生堂门口向胡桃打招呼"，"胡桃在往生堂" -> 触发并生成描述：胡桃听到了hadi在打招呼，看到了hadi在往生堂门口。
+
+hutao_place = "往生堂"
 
 EVENTS_LIST = [
-    "胡桃看到了hadi在往生堂门口,听到了hadi在打招呼。",
-    "胡桃收到璃月管委会的消息,内容为：往生堂第七十七代堂主，您好。近来璃月要举行一场特别的送别之仪，请您着手策划。",
-    "胡桃从对话中了解到，hadi点了一杯拿铁。",
-    "胡桃听到自己的闹钟响了，查看后发现备注为：记得看看璃月的历史书！"
+    "hadi在往生堂门口,向胡桃打招呼。",
+    "璃月管委会向胡桃发消息,内容为：往生堂第七十七代堂主，您好。近来璃月要举行一场特别的送别之仪，请您着手策划。",
+    "hadi在咖啡店前台点了一杯拿铁。",
+    "胡桃的闹钟响了，查看后发现备注为：记得看看璃月的历史书！"
+]
+
+PERCEPTION_LIST = [
+    "胡桃听到了hadi在打招呼。",
+    "胡桃收到了璃月管委会的消息,内容为：往生堂第七十七代堂主，您好。近来璃月要举行一场特别的送别之仪，请您着手策划。",
+    "胡桃收到了咖啡店前台系统的消息,内容为：hadi点了一杯拿铁。",
+    "胡桃听到了自己的闹钟响了，查看后发现备注为：记得看看璃月的历史书！"
 ]
 
 def save_to_file(file_path:str, conversations)-> None:
@@ -72,6 +85,7 @@ if __name__ == "__main__":
             def perceive_and_change_action(trigger):
                 if not trigger:
                     return "下拉菜单为空或没有接收到下拉菜单的值", "../resource/pictures/hutao_naohuo.webp"
+
                 old_action_state = hutao.brain.fsm.action_state
                 thought = hutao.brain.create_thought_from_perception(trigger)
                 hutao.brain.fsm.action_state_transition(trigger, thought)
@@ -91,7 +105,9 @@ if __name__ == "__main__":
             query_button = gr.Button("查询胡桃的行动情况🤶")
             query_button.click(show_action_state, inputs=[], outputs=[state_box, image_box])
 
-            events_dropdown = gr.Dropdown(choices=EVENTS_LIST, label="可以模拟的事件列表🧐")
+            events_dropdown = gr.Dropdown(choices=PERCEPTION_LIST,
+                                          label="可以模拟的事件列表🧐,也可以试试自己写！",
+                                          allow_custom_value=True)
             event_button = gr.Button("模拟一些事件的发生⚡")
             event_button.click(perceive_and_change_action, inputs=events_dropdown, outputs=[state_box, image_box])
 
@@ -173,12 +189,12 @@ if __name__ == "__main__":
                     memory_dropdown = gr.Dropdown(memory_keys, label="要删除的记忆序号\U0001F600")
                     memory_deleted = gr.Textbox(label="已删除的胡桃记忆🧠")
                     button = gr.Button("删除记忆🧠")
-                    button.click(fn=del_memory, inputs=memory_dropdown, outputs=[memory_deleted,memory_dropdown])
+                    button.click(fn=del_memory, inputs=memory_dropdown, outputs=[memory_deleted, memory_dropdown])
 
                     def del_knowledge(knowledge_index):
                         knowledge_str = ""
                         if isinstance(knowledge_index, int):
-                            knowledge_str = hutao.brain.del_knowledge(mode="single",index=knowledge_index)
+                            knowledge_str = hutao.brain.del_knowledge(mode="single", index=knowledge_index)
                             save_agent_json(hutao.brain)
                         if not knowledge_str:
                             knowledge_str = "下拉菜单为空或没有接收到下拉菜单的值"
@@ -192,10 +208,12 @@ if __name__ == "__main__":
                     knowledge_dropdown = gr.Dropdown(knowledge_keys, label="要删除的知识序号\U0001F600")
                     knowledge_deleted = gr.Textbox(label="已删除的胡桃知识📚")
                     button = gr.Button("删除知识📚")
-                    button.click(fn=del_knowledge, inputs=knowledge_dropdown, outputs=[knowledge_deleted,knowledge_dropdown])
+                    button.click(fn=del_knowledge,
+                                 inputs=knowledge_dropdown,
+                                 outputs=[knowledge_deleted, knowledge_dropdown])
 
         with gr.Tab("注入一些知识\U0001F4D6"):
-            def split_text_and_add_to_knowledge(content):
+            def split_text_and_add_to_knowledge(content, summary_text):
                 # 若源内容过长就先切分
                 max_unit_length = 500
                 split = False
@@ -203,32 +221,36 @@ if __name__ == "__main__":
                 # 如果 tokens 数量超过了限制，进行切分处理
                 if len(content) > max_unit_length:
                     split = True
-                    segments = Perception.split_text(content, min_length=max_unit_length, buffer_min_length=int(max_unit_length*0.3))
-                    pairs = Perception.get_text_embedding_pairs(segments)
-                    hutao.brain.add_knowledge_list(pairs)
+                    segments = Perception.split_text(content,
+                                                     min_length=max_unit_length,
+                                                     buffer_min_length=int(max_unit_length*0.3))
+                    knowledge_list = Perception.get_knowledge_list(segments)
+                    knowledge_str = ""
+                    for idx, knowledge in enumerate(knowledge_list, 0):
+                        knowledge_str += (f"知识单元{idx}\n"
+                                          f"知识描述:\n{knowledge['text']}\n"
+                                          f"嵌入向量大小:{len(knowledge['embedding'])}\n"
+                                          f"子知识文件路径：{knowledge['sub_knowledge']}\n"
+                                          f"{'-' * 40}\n")
+
+                    hutao.brain.add_knowledge_with_sub_knowledge(summary_text, knowledge_list)
                     save_agent_json(hutao.brain)
 
-                    pairs_str = ""
-                    for idx, pair in enumerate(pairs, 0):
-                        pairs_str += (f"知识单元{idx}\n"
-                                      f"知识描述:\n{pair['text']}\n"
-                                      f"嵌入向量大小:{len(pair['embedding'])}\n"
-                                      f"{'-' * 40}\n")
-
-                    return pairs_str, split
+                    return knowledge_str, split
 
                 else:
                     knowledge = hutao.brain.add_knowledge_from_text(content)
                     save_agent_json(hutao.brain)
                     knowledge_str = (f"知识描述:\n{knowledge['text']}\n"
                                      f"嵌入向量大小:{len(knowledge['embedding'])}\n"
+                                     f"子知识文件路径：{knowledge['sub_knowledge']}\n"
                                      f"{'-' * 40}\n")
 
                     return knowledge_str, split
 
-            def add_knowledge_from_webpage(webpage_content):
+            def add_knowledge_from_webpage(webpage_content, summary_text):
                 # 从页面输入获得知识
-                pairs_str, split = split_text_and_add_to_knowledge(webpage_content)
+                pairs_str, split = split_text_and_add_to_knowledge(webpage_content, summary_text)
 
                 if split:
                     webpage_str = (f"从页面输入的内容中获得了以下知识:\n\n"
@@ -239,14 +261,15 @@ if __name__ == "__main__":
                 return webpage_str
 
             gr.Interface(fn=add_knowledge_from_webpage,
-                         inputs=gr.Textbox(label="输入知识文本📝"),
+                         inputs=[gr.Textbox(label="直接输入知识文本📝"),
+                                 gr.Textbox(label="输入知识文本的总结📝,这对分块索引很重要")],
                          outputs=gr.Textbox(label="从页面输入中提取到的知识📝"),
                          allow_flagging="never")
 
-            def add_knowledge_from_pdf(pdf_path):
+            def add_knowledge_from_pdf(pdf_path, summary_text):
                 # 对pdf进行切分，直接加载到知识库
                 pdf_content = hutao.perception.read_pdf(pdf_path)
-                pairs_str, split = split_text_and_add_to_knowledge(pdf_content)
+                pairs_str, split = split_text_and_add_to_knowledge(pdf_content, summary_text)
 
                 if split:
                     pdf_str = (f"基于PDF:{pdf_path}加载了如下内容:\n\n{pdf_content}"
@@ -257,16 +280,17 @@ if __name__ == "__main__":
                 return pdf_str
 
             gr.Interface(fn=add_knowledge_from_pdf,
-                         inputs=gr.File(label="上传PDF📝"),
+                         inputs=[gr.File(label="上传PDF📝"),
+                                 gr.Textbox(label="输入知识文本的总结📝,这对分块索引很重要")],
                          outputs=gr.Textbox(label="从PDF提取到的知识📝"),
                          allow_flagging="never")
 
-            def add_knowledge_from_wiki(search_query):
+            def add_knowledge_from_wiki(search_query, summary_text):
                 # 获取wiki内容
                 wiki_object = hutao.action.use_wiki(search_query)
                 wiki_url = wiki_object['url']
                 wiki_content = wiki_object['content']
-                pairs_str, split = split_text_and_add_to_knowledge(wiki_content)
+                pairs_str, split = split_text_and_add_to_knowledge(wiki_content, summary_text)
 
                 if split:
                     wiki_str = (f"基于Wiki的查询:{search_query}\n找到了URL:{wiki_url},内容如下："
@@ -277,7 +301,8 @@ if __name__ == "__main__":
                 return wiki_str
 
             gr.Interface(fn=add_knowledge_from_wiki,
-                         inputs=gr.Textbox(label="搜索Wiki百科📝"),
+                         inputs=[gr.Textbox(label="搜索Wiki百科📝"),
+                                 gr.Textbox(label="输入知识文本的总结📝,这对分块索引很重要")],
                          outputs=gr.Textbox(label="从Wiki提取到的知识📝"),
                          allow_flagging="never")
 

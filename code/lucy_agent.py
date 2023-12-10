@@ -17,3 +17,14 @@ if __name__ == "__main__":
 
     hutao = LucyAgent(perception=Perception(), brain=Brain.from_json(loaded_data), action=Action())
 
+    with open("../xiaogong.txt","r",encoding="utf-8") as f:
+        text = f.read()
+
+    print(f"文本总长度:{len(text)}")
+    segments = Perception.split_text(text,500,150)
+    knowledge_list = Perception.get_knowledge_list(segments)
+    hutao.brain.add_knowledge_with_sub_knowledge(summary_text="宵宫是稻妻技艺最精湛的烟花专家，被誉为“夏祭的女王”。",
+                                                 sub_knowledge_list=knowledge_list)
+    hutao.brain.search_knowledge()
+
+

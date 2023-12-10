@@ -96,7 +96,7 @@ class Perception:
 
             # 如果当前段落达到指定长度，或者已经是最后一句话了，则结束当前段落
             if len(current_segment) >= min_length or (i == len(sentences) - 1):
-                if(i == len(sentences) - 1) and buffer_sentences:
+                if (i == len(sentences) - 1) and buffer_sentences:
                     current_segment += buffer_sentences
                 segments.append(current_segment.replace(' ', '').replace('\n', ''))
                 # 如果已经是最后一句话了，就不需要再设置 `cleared_buffer` 了
@@ -111,28 +111,40 @@ class Perception:
         return segments
 
     @classmethod
-    def get_text_embedding_pairs(cls, segments):
+    def get_knowledge_list(cls, segments):
         """
-        获取text_embedding对的列表
+        从文本段中获取知识列表,供brain导入
 
         参数:
         segments: 文本段落的列表。
 
         返回:
-        包含文本和嵌入向量配对的列表。
+        包含所有文本端的知识单元列表。
         """
         embeddings = apis.embedding(segments)
-        pairs = []
+        knowledge_list = []
         for i in range(len(segments)):
-            text_embedding_pair = {
+            knowledge = {
                 "text": segments[i],
-                "embedding": embeddings[i]
+                "embedding": embeddings[i],
+                "sub_knowledge": None
             }
-            pairs.append(text_embedding_pair)
+            knowledge_list.append(knowledge)
 
-        with open("../resource/pairs.json","w",encoding="utf-8") as f:
-            json.dump(pairs, f, indent=4, ensure_ascii=False)
+        with open("../resource/knowledge_list.json", "w", encoding="utf-8") as f:
+            json.dump(knowledge_list, f, indent=4, ensure_ascii=False)
 
-        return pairs
+        return knowledge_list
 
+if __name__ == "__main__":
+    with open("../xiaogong.txt","r",encoding="utf-8") as f:
+        text = f.read()
 
+    print(f"文本总长度:{len(text)}")
+    segments = Perception.split_text(text,500,0)
+    for segment in segments:
+        print(f"文本段长度：{len(segment)}\n{segment}\n")
+
+    segments = Perception.split_text(text,500,100)
+    for segment in segments:
+        print(f"文本段长度：{len(segment)}\n{segment}\n")

@@ -1,3 +1,4 @@
+import os
 import time
 import json
 import numpy as np
@@ -106,6 +107,7 @@ class Brain:
 >>>
 请提供一个简洁，陈述性的总结，不要添加额外格式，不要修改事件的实际内容或添加额外信息。
 """
+        print(summary_prompt)
         summary = apis.chatgpt(summary_prompt,0.5)  # 假设这个函数调用返回一个字符串摘要。
         embedding_list = apis.embedding(summary)  # 假设这个函数调用返回一个嵌入向量。
         time_string = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
@@ -114,7 +116,7 @@ class Brain:
             "create_time": time_string,
             "embedding": embedding_list[0]
         }
-        logger.info(f"从{input}和{output}中创建了新记忆：{summary}")
+        logger.info(f"从{perception}和{output}中创建了新记忆：{summary}")
         return memory
 
     def add_memory(self, memory):
@@ -248,11 +250,18 @@ class Brain:
 
     def search_memory(self, query_embedding):
         """搜索记忆的方法，只返回最相似的一个记忆项"""
-        # 如果没有记忆项，直接返回提示信息
+        # 如果没有记忆项或查询向量，直接返回提示信息
         if not self.memory_stream:
             return {
                 "description": "没有记忆单元",
                 "create_time": "没有记忆单元",
+                "embedding": []
+            }
+
+        if not query_embedding:
+            return {
+                "description": "查询向量为空",
+                "create_time": "查询向量为空",
                 "embedding": []
             }
 
@@ -275,55 +284,131 @@ class Brain:
 
     @classmethod
     def extract_knowledge(cls, source):
-        """从包含知识的文本中提取知识"""
+        """从包含知识的文本中提取知识，也可以生成子知识的总结文本"""
         summary_prompt = f"""
-任务：总结文本中包含的信息或知识点。
+任务：提取并总结文本中包含的信息或知识点。
 字数限制：不超过500字。
 知识点文本：
 <<<
 {source}
 >>>
-请提供一个准确的、陈述性的知识点总结,不要改变原始内容或添加额外信息,不要丢失关键信息。
+请提供准确的、陈述性的知识点总结,不要改变原始内容或添加额外信息,不要丢失关键信息。
 """
         summary = apis.chatgpt(summary_prompt, 0.3)
         logger.info(f"从{source}提取了知识点：{summary}")
         return summary
 
-    def add_knowledge_list(self,knowledge_list):
-        """添加一个知识对象列表添加到知识库中。"""
+    def add_knowledge_list(self, knowledge_list):
+        """
+        将一个知识对象列表添加到知识库中，并记录日志。
+
+        参数:
+        knowledge_list (list): 包含知识对象的列表，每个知识对象都是一个包含"text"和其他可能的信息的字典。
+
+        返回:
+        无
+        """
         for knowledge in knowledge_list:
             self.basic_knowledge.append(knowledge)
             logger.info(f"添加了知识：{knowledge['text']}")
 
-    def add_knowledge_from_text(self, text):
-        """添加单个知识添加到知识库中。"""
+    def add_knowledge_from_text(self, text, sub_knowledge=None):
+        """
+        根据提供的文本添加一个知识对象到知识库中，并记录日志。可选地，可以指定一个子知识的引用。
+
+        参数:
+        text (str): 要添加到知识库的知识文本。
+        sub_knowledge (str, optional): 子知识的引用路径或标识符，默认为None。
+
+        返回:
+        无
+        """
         embedding_list = apis.embedding(text)
         knowledge = {
             "text": text,
-            "embedding": embedding_list[0]
+            "embedding": embedding_list[0],
+            "sub_knowledge": sub_knowledge
         }
         self.basic_knowledge.append(knowledge)
         logger.info(f"添加了知识：{text}")
 
+    def add_knowledge_with_sub_knowledge(self, summary_text, sub_knowledge_list):
+        """
+        为具有子知识列表的知识总结创建一个JSON文件来存储子知识，并将知识总结添加到知识库中。
+
+        参数:
+        summary_text (str): 知识总结的文本。
+        sub_knowledge_list (list): 子知识的列表，每个子知识通常包含文本描述等信息。
+
+        返回:
+        无
+        """
+        sub_knowledge_file = f"../knowledge/{hash(summary_text)}_sub_knowledge.json"
+        with open(sub_knowledge_file, 'w', encoding="utf-8") as file:
+            json.dump(sub_knowledge_list, file, ensure_ascii=False, indent=4)
+
+        logger.info(f"为知识总结：{summary_text} 添加了子知识文件：{sub_knowledge_file}")
+        self.add_knowledge_from_text(summary_text, sub_knowledge=sub_knowledge_file)
+
     def del_knowledge(self, index=0, mode="single"):
-        """从记忆流中删除指定索引的记忆。"""
+        """
+        从知识库中删除指定索引的知识单元。如果该知识单元有子知识，也会一并删除。
+
+        参数:
+        index (int): 要删除的知识单元的索引，默认为0。
+        mode (str): 删除模式，"single"表示删除单个知识单元，"all"表示删除所有知识单元。
+
+        返回:
+        str: 删除操作的结果消息。
+        """
         if mode == "single":
             try:
-                text = self.basic_knowledge[index]["text"]
+                delete_str = ""
+                knowledge = self.basic_knowledge[index]
+                text = knowledge["text"]
+                delete_str += f"删除了知识:{text}"
+
+                # 如果存在子知识文件，删除该文件
+                sub_knowledge_file = knowledge.get("sub_knowledge")
+                if sub_knowledge_file:
+                    try:
+                        os.remove(sub_knowledge_file)
+                        delete_str += f"删除了子知识文件:{sub_knowledge_file}"
+                        logger.info(f"删除了子知识文件:{sub_knowledge_file}")
+                    except FileNotFoundError:
+                        delete_str += f"删除了子知识文件:{sub_knowledge_file}"
+                        logger.info(f"子知识文件:{sub_knowledge_file}未找到或已被删除")
+                # 删除知识单元
                 del self.basic_knowledge[index]
-                logger.info(f"删除了记忆:{text}")
-                print(f"删除了\"{text}\"")
-                return f"删除了\"{text}\""
+                logger.info(f"删除了知识:{text}")
+                print(delete_str)
+                return delete_str
             except IndexError:
                 print("提供的索引超出了知识库的范围。")
                 return "提供的索引超出了知识库的范围。"
+
         elif mode == "all":
+            for knowledge in self.basic_knowledge:
+                sub_knowledge_file = knowledge.get("sub_knowledge")
+                if sub_knowledge_file:
+                    try:
+                        os.remove(sub_knowledge_file)
+                    except FileNotFoundError:
+                        pass
             self.basic_knowledge.clear()  # 清空整个列表
             print("已清空所有知识。")
             return "已清空所有知识。"
 
     def show_knowledge(self):
-        """展示所有知识。"""
+        """
+        展示知识库中的所有知识单元及其子知识（如果有）。
+
+        参数:
+        无
+
+        返回:
+        str: 知识库内容的字符串表示。
+        """
         knowledge_str = ""
         if not self.basic_knowledge:
             knowledge_str = "没有知识单元\n"
@@ -341,24 +426,44 @@ class Brain:
                 f"知识 #{idx}\n"
                 f"描述: {text}\n"
                 f"嵌入向量大小: {embedding_size}\n"
-                f"{'-' * 40}\n"
             )
+            # 展示子知识
+            sub_knowledge_file = knowledge.get("sub_knowledge")
+            if sub_knowledge_file:
+                try:
+                    with open(sub_knowledge_file, 'r', encoding="utf-8") as file:
+                        sub_knowledges = json.load(file)
+                    knowledge_str += f"子知识:\n"
+                    for sub_knowledge in sub_knowledges:
+                        knowledge_str += f"- {sub_knowledge['text']}\n"
+                except FileNotFoundError:
+                    knowledge_str += "有子知识,子知识文件未找到或已被删除\n"
+            knowledge_str += f"{'-' * 40}\n"
 
         print(knowledge_str)
         return knowledge_str
 
     def search_knowledge(self, query_embedding):
-        """搜索知识的方法，只返回最相似的一个知识项"""
-        # 如果没有知识项，直接返回提示信息
+        """
+        该函数用于在预定义的知识库中搜索与给定查询向量最相似的知识项，并返回与之最相似的知识文本。
+
+        参数:
+        query_embedding: 查询的向量表示，用于与知识库中的知识项进行相似度比较。
+
+        返回:
+        knowledge_text: 与查询向量最相似的知识项的文本。如果没有知识库或查询向量为空，则返回相应的提示信息。
+        """
+        # 如果没有知识项或查询向量，直接返回提示信息
         if not self.basic_knowledge:
-            return {
-                "text": "没有知识单元",
-                "embedding": []
-            }
+            return "没有知识单元"
+
+        if not query_embedding:
+            return "查询向量为空"
 
         # 初始化最高相似度和相应的知识项
         max_similarity = -1
         most_similar_knowledge = None
+        knowledge_text = ""
 
         # 遍历所有知识项
         for knowledge in self.basic_knowledge:
@@ -369,21 +474,47 @@ class Brain:
                 max_similarity = similarity
                 most_similar_knowledge = knowledge
 
+        knowledge_text += most_similar_knowledge["text"]
         logger.info(f"找到了最相似的知识：{most_similar_knowledge['text']}")
-        return most_similar_knowledge
 
-    def chat(self, input, history):
-        query_embedding = apis.embedding(input)[0]
+        sub_knowledge_file = most_similar_knowledge.get("sub_knowledge")
+        if sub_knowledge_file:
+            try:
+                with open(sub_knowledge_file, 'r', encoding="utf-8") as file:
+                    sub_knowledges = json.load(file)
+
+                max_similarity = -1
+                most_similar_knowledge = None
+
+                for sub_knowledge in sub_knowledges:
+                    # 计算点积
+                    similarity = cosine_similarity(query_embedding, sub_knowledge["embedding"])
+                    # 更新最高相似度和相应的知识项
+                    if similarity > max_similarity:
+                        max_similarity = similarity
+                        most_similar_knowledge = sub_knowledge
+
+                knowledge_text += most_similar_knowledge["text"]
+                logger.info(f"找到了最相似的子知识：{most_similar_knowledge['text']}")
+
+            except FileNotFoundError:
+                knowledge_text += "有子知识,但子知识文件未找到或已被删除\n"
+
+        return knowledge_text
+
+    def chat(self, user_input, history):
+        query_embedding = apis.embedding(user_input)[0]
 
         if history is None:
             history = []
-        history.append(f"hadi:{input}")
+        history.append(f"hadi:{user_input}")
+
         context = ""
         for chat in history:
             context = context + chat + "\n"
 
         memory = self.search_memory(query_embedding)
-        knowledge = self.search_knowledge(query_embedding)
+        knowledge_text = self.search_knowledge(query_embedding)
 
         prompt = f"""
 角色名称：{self.name}
@@ -391,7 +522,7 @@ class Brain:
 当前心情：{self.fsm.mood}
 任务：作为{self.name}进行回复。
 字数限制：不超过100字。
-辅助信息：相关记忆：“{memory['description']}” 相关知识：“{knowledge['text']}”
+辅助信息：相关记忆：“{memory['description']}” 相关知识：“{knowledge_text}”
 对话上下文：
 <<<
 {self.language_style}
@@ -408,16 +539,20 @@ class Brain:
         return response, history
 
     def create_thought_from_perception(self, trigger):
+        trigger_embedding = apis.embedding(trigger)[0]
+        memory = self.search_memory(trigger_embedding)
+        knowledge_text = self.search_knowledge(trigger_embedding)
         prompt = f"""
 角色名称：{self.name}
 初始记忆：{self.seed_memory}
-任务：分析角色感知到的信息，基于角色视角(第一视角，我应该如何？)进行思考，包含对角色相关事件的判断和角色的心理反应。
+任务：分析角色感知到的信息，基于角色第一视角进行思考，包含对角色相关事件的判断和角色的心理反应。
 字数限制：不超过100字。
+辅助信息：相关记忆：“{memory['description']}” 相关知识：“{knowledge_text}”
 感知到的信息：
 <<<
 {trigger}
 >>>
-请仅返回思考内容，不要添加额外信息或格式。
+请仅返回第一人称视角下的思考内容，不要添加额外信息或格式。
 """
         print(prompt)
         logger.info(f"生成了思考提示：{prompt}")
@@ -426,20 +561,20 @@ class Brain:
         logger.info(f"生成了思考内容：{thought}")
         return thought
 
-    def create_thought_from_query(self, memory, knowledge, context):
+    def create_thought_from_query(self, memory, knowledge_text, context):
         prompt = f"""
 角色名称：{self.name}
 初始记忆：{self.seed_memory}
 当前心情：{self.fsm.mood}
-任务：根据对话上下文和辅助信息，基于角色视角(第一视角，我应该如何？)进行思考，包含对角色相关事件的判断和角色的心理反应。
+任务：根据对话上下文和辅助信息，基于角色视角第一视角进行思考，包含对角色相关事件的判断和角色的心理反应。
 字数限制：不超过100字。
-辅助信息：相关记忆：“{memory['description']}” 相关知识：“{knowledge['text']}”
+辅助信息：相关记忆：“{memory['description']}” 相关知识：“{knowledge_text}”
 对话上下文：
 <<<
 {self.language_style}
 {context}
 >>>
-请仅返回思考内容，不要添加额外信息或格式。
+请仅返回第一人称视角下的思考内容，不要添加额外信息或格式。
 """
         print(prompt)
         logger.info(f"生成了思考提示：{prompt}")
@@ -448,19 +583,19 @@ class Brain:
         logger.info(f"生成了思考内容：{thought}")
         return thought
 
-    def cot_chat(self, input, history):
-        query_embedding = apis.embedding(input)[0]
+    def cot_chat(self, user_input, history):
+        query_embedding = apis.embedding(user_input)[0]
 
         if history is None:
             history = []
-        history.append(f"hadi:{input}")
+        history.append(f"hadi:{user_input}")
         context = ""
         for chat in history:
             context = context + chat + "\n"
 
         memory = self.search_memory(query_embedding)
-        knowledge = self.search_knowledge(query_embedding)
-        thought = self.create_thought_from_query(memory, knowledge, context)
+        knowledge_text = self.search_knowledge(query_embedding)
+        thought = self.create_thought_from_query(memory, knowledge_text, context)
 
         prompt = f"""
 角色名称：{self.name}
@@ -497,6 +632,7 @@ if __name__ == "__main__":
 
     # 打印状态
     print(hutao.brain.show_info())
+
 
     # 将更新后的大脑状态保存到JSON文件中。
     try:
