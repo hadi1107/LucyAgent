@@ -18,17 +18,17 @@ from lucy_agent import LucyAgent
 hutao_place = "往生堂"
 
 EVENTS_LIST = [
-    "hadi在往生堂门口,向胡桃打招呼。",
-    "璃月管委会向胡桃发消息,内容为：往生堂第七十七代堂主，您好。近来璃月要举行一场特别的送别之仪，请您着手策划。",
-    "hadi在咖啡店前台点了一杯拿铁。",
-    "胡桃的闹钟响了，查看后发现备注为：记得看看璃月的历史书！"
+    ("hadi在往生堂门口,向胡桃打招呼。", "往生堂"),
+    ("璃月管委会向胡桃发消息,内容为：往生堂第七十七代堂主,您好。近来璃月要举行一场特别的送别之仪,请您着手策划。", "全局"),
+    ("hadi在咖啡店前台点了一杯拿铁。", "咖啡店"),
+    ("胡桃的闹钟响了,查看后发现备注为：记得看看璃月的历史书！", "全局")
 ]
 
 PERCEPTION_LIST = [
     "胡桃听到了hadi在打招呼。",
-    "胡桃收到了璃月管委会的消息,内容为：往生堂第七十七代堂主，您好。近来璃月要举行一场特别的送别之仪，请您着手策划。",
+    "胡桃收到了璃月管委会的消息,内容为：往生堂第七十七代堂主,您好。近来璃月要举行一场特别的送别之仪,请您着手策划。",
     "胡桃收到了咖啡店前台系统的消息,内容为：hadi点了一杯拿铁。",
-    "胡桃听到了自己的闹钟响了，查看后发现备注为：记得看看璃月的历史书！"
+    "胡桃听到了自己的闹钟响了,查看后发现备注为：记得看看璃月的历史书！"
 ]
 
 def save_to_file(file_path:str, conversations)-> None:
@@ -115,7 +115,7 @@ if __name__ == "__main__":
             def talk_with_hutao(query, history=None):
                 if hutao.brain.fsm.action_state != "回复问题和聊天":
                     action_state_str, scene_path = show_action_state()
-                    return f"{action_state_str},没法回复你嘞，请去第一个标签页改变胡桃状态", "../resource/audios/这是一段测试音频哟.wav", scene_path
+                    return f"{action_state_str},没法回复你嘞,请去第一个标签页改变胡桃状态", "../resource/audios/这是一段测试音频哟.wav", scene_path
                 if not query:
                     return f"请不要不说话嘞", "../resource/audios/这是一段测试音频哟.wav", "../resource/pictures/hutao_naohuo.webp"
                 if history is None:
@@ -137,7 +137,7 @@ if __name__ == "__main__":
                 image_path = hutao.brain.fsm.get_current_emoji()
 
                 # 生成响应的音频
-                audio_file_path = apis.genshin_tts(text=response.lstrip("胡桃:"), speaker="胡桃")
+                audio_file_path = apis.genshin_tts_v2(prompt=response.lstrip("胡桃:"), speaker="胡桃_ZH")
 
                 if audio_file_path == "Error":
                     default_audio_path = "../resource/audios/这是一段测试音频哟.wav"
@@ -152,7 +152,7 @@ if __name__ == "__main__":
                     # 创建一个用于显示历史记录的文本框
                     history_box = gr.Textbox(lines=10, label="对话历史记录\U0001F4DD")
                     # 创建一个文本框，用于输入文本
-                    txt = gr.Textbox(show_label=False, placeholder="输入文本，例如\"胡桃可以给我来一杯咖啡吗？\"\U0001F4AC")
+                    txt = gr.Textbox(show_label=False, placeholder="输入文本,例如\"胡桃可以给我来一杯咖啡吗？\"\U0001F4AC")
 
                 with gr.Column():
                     # 创建一个音频播放器
@@ -188,7 +188,7 @@ if __name__ == "__main__":
                     memory_keys = list(range(len(hutao.brain.memory_stream)))
                     memory_dropdown = gr.Dropdown(memory_keys, label="要删除的记忆序号\U0001F600")
                     memory_deleted = gr.Textbox(label="已删除的胡桃记忆🧠")
-                    button = gr.Button("删除记忆🧠")
+                    button = gr.Button("删除记忆🧊")
                     button.click(fn=del_memory, inputs=memory_dropdown, outputs=[memory_deleted, memory_dropdown])
 
                     def del_knowledge(knowledge_index):
@@ -200,14 +200,14 @@ if __name__ == "__main__":
                             knowledge_str = "下拉菜单为空或没有接收到下拉菜单的值"
 
                         knowledge_keys = list(range(len(hutao.brain.basic_knowledge)))
-                        knowledge_dropdown = gr.Dropdown(knowledge_keys, label="要删除的知识序号\U0001F600")
+                        knowledge_dropdown = gr.Dropdown(knowledge_keys, label="要删除的知识序号\U0001F600,注意子知识也会被删除")
 
                         return knowledge_str, knowledge_dropdown
 
                     knowledge_keys = list(range(len(hutao.brain.basic_knowledge)))
                     knowledge_dropdown = gr.Dropdown(knowledge_keys, label="要删除的知识序号\U0001F600")
-                    knowledge_deleted = gr.Textbox(label="已删除的胡桃知识📚")
-                    button = gr.Button("删除知识📚")
+                    knowledge_deleted = gr.Textbox(label="已删除的胡桃知识📝")
+                    button = gr.Button("删除知识🧊")
                     button.click(fn=del_knowledge,
                                  inputs=knowledge_dropdown,
                                  outputs=[knowledge_deleted, knowledge_dropdown])
@@ -221,19 +221,19 @@ if __name__ == "__main__":
                 # 如果 tokens 数量超过了限制，进行切分处理
                 if len(content) > max_unit_length:
                     split = True
+                    knowledge_str = ""
                     segments = Perception.split_text(content,
                                                      min_length=max_unit_length,
                                                      buffer_min_length=int(max_unit_length*0.3))
                     knowledge_list = Perception.get_knowledge_list(segments)
-                    knowledge_str = ""
+                    sub_knowledge_file = hutao.brain.add_knowledge_with_sub_knowledge(summary_text, knowledge_list)
+                    knowledge_str += f"加入到知识库中的根知识为:{summary_text}\n\n其子知识文件路径为:{sub_knowledge_file}\n\n"
                     for idx, knowledge in enumerate(knowledge_list, 0):
                         knowledge_str += (f"知识单元{idx}\n"
                                           f"知识描述:\n{knowledge['text']}\n"
                                           f"嵌入向量大小:{len(knowledge['embedding'])}\n"
                                           f"子知识文件路径：{knowledge['sub_knowledge']}\n"
                                           f"{'-' * 40}\n")
-
-                    hutao.brain.add_knowledge_with_sub_knowledge(summary_text, knowledge_list)
                     save_agent_json(hutao.brain)
 
                     return knowledge_str, split
@@ -250,14 +250,14 @@ if __name__ == "__main__":
 
             def add_knowledge_from_webpage(webpage_content, summary_text):
                 # 从页面输入获得知识
-                pairs_str, split = split_text_and_add_to_knowledge(webpage_content, summary_text)
+                knowledge_str, split = split_text_and_add_to_knowledge(webpage_content, summary_text)
 
                 if split:
                     webpage_str = (f"从页面输入的内容中获得了以下知识:\n\n"
-                                   f"由于知识源文本过长而进行了切分：\n\n{pairs_str}")
+                                   f"由于知识源文本过长而进行了切分,并以总结文本为根生成了子知识文件：\n\n{knowledge_str}")
                 else:
                     webpage_str = (f"从页面输入的内容中获得了以下知识:\n\n"
-                                   f"\n\n{pairs_str}")
+                                   f"\n\n{knowledge_str}")
                 return webpage_str
 
             gr.Interface(fn=add_knowledge_from_webpage,
@@ -273,7 +273,7 @@ if __name__ == "__main__":
 
                 if split:
                     pdf_str = (f"基于PDF:{pdf_path}加载了如下内容:\n\n{pdf_content}"
-                               f"\n\n由于知识源文本过长而进行了切分：\n\n{pairs_str}")
+                               f"\n\n由于知识源文本过长而进行了切分,并以总结文本为根生成了子知识文件：\n\n{pairs_str}")
                 else:
                     pdf_str = (f"基于PDF:{pdf_path}加载了如下内容:\n\n{pdf_content}"
                                f"\n\n{pairs_str}")
@@ -294,7 +294,7 @@ if __name__ == "__main__":
 
                 if split:
                     wiki_str = (f"基于Wiki的查询:{search_query}\n找到了URL:{wiki_url},内容如下："
-                                f"\n\n{wiki_content}\n\n由于知识源文本过长而进行了切分：\n\n{pairs_str}")
+                                f"\n\n{wiki_content}\n\n由于知识源文本过长而进行了切分,并以总结文本为根生成了子知识文件：\n\n{pairs_str}")
                 else:
                     wiki_str = (f"基于Wiki的查询:{search_query}\n找到了URL:{wiki_url},内容如下："
                                 f"\n\n{wiki_content}\n\n{pairs_str}")
@@ -305,6 +305,22 @@ if __name__ == "__main__":
                                  gr.Textbox(label="输入知识文本的总结📝,这对分块索引很重要")],
                          outputs=gr.Textbox(label="从Wiki提取到的知识📝"),
                          allow_flagging="never")
+
+        with gr.Tab("管理子知识文件\U0001F4D6"):
+            sub_knowledge_json = gr.File(label="上传子知识文件📝")
+            sub_knowledge_text = gr.Textbox(label="子知识文件的内容📝")
+            gr.Interface(fn=Brain.show_sub_knowledge,
+                         inputs=sub_knowledge_json,
+                         outputs=sub_knowledge_text,
+                         allow_flagging="never")
+
+            add_knowledge_text = gr.Textbox(label="给子知识文件添加知识📚")
+            add_knowledge_text_button = gr.Button("添加知识📚")
+            del_knowledge_text = gr.Textbox(label="删除子知识文件的部分知识🧊")
+            add_knowledge_text_button = gr.Button("删除知识🧊")
+
+            feedback_text = gr.Textbox(label="相关操作的反馈📝")
+
 
         with gr.Tab("常用的Prompts\U0001F4AD"):
             # 加载预制prompt

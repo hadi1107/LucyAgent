@@ -40,7 +40,7 @@ class AgentFSM:
 现在请根据角色目前的心情状态,观察到的事件和角色想法的具体内容,从可能的心情列表中选择一个心情，例如“{self.mood_list[0]}”，不要进行额外的输出。
 """
         print(mood_transition_prompt)
-        response = apis.chatgpt(mood_transition_prompt, temperature=0.5)
+        response = apis.request_chatgpt(mood_transition_prompt, temperature=0.5)
         print(f"输出心情为:{response}")
         new_mood = response.strip()
         return new_mood
@@ -70,7 +70,7 @@ class AgentFSM:
         # 构造中文提示文本
         action_state_transition_prompt = f"""
 任务：推理角色的下一个行动应该是什么。下一个行动可以是不变的。下面有一个例子给你作为参考，实际推理和例子无关。
-例如：胡桃当前正在策划往生堂相关活动。胡桃从对话中了解到，hadi点了一杯拿铁。胡桃认为：作为咖啡店的经营者，我的第一反应是确保咖啡店能够顺利提供给hadi他所点的拿铁。结合起来，应当输出的下一步行动为："做咖啡并递交给客户"。
+例如：胡桃当前正在策划往生堂相关活动。胡桃听到了hadi在打招呼,胡桃认为：hadi在给我打招呼，我应该赶快回应他。结合起来，你应当输出："回复问题和聊天"。
 <<<
 角色当前行动状态：{self.action_state}
 观察到的事件：{trigger}
@@ -80,7 +80,7 @@ class AgentFSM:
 现在请根据角色目前的行动状态,观察到的事件和角色想法的具体内容，从可能的行动列表中选择一个行动，例如“{self.action_state_list[0]}”，不要进行额外的输出。
 """
         print(action_state_transition_prompt)
-        response = apis.chatgpt(action_state_transition_prompt, temperature=0.5)
+        response = apis.request_chatgpt(action_state_transition_prompt, temperature=0.5)
         print(f"输出状态为:{response}")
         new_action_state = response.strip()
         return new_action_state

@@ -51,7 +51,7 @@ class Brain:
         # 动态属性，注意到mood的初始化是固定的
         self.basic_knowledge = basic_knowledge
         self.memory_stream = memory_stream
-        self.fsm = AgentFSM(initial_mood=mood_list[0],initial_action_state=action_state_list[0],
+        self.fsm = AgentFSM(initial_mood=mood_list[0], initial_action_state=action_state_list[0],
                             mood_list=mood_list, emoji_list=emoji_list, action_state_list=action_state_list)
 
     def to_json(self):
@@ -87,6 +87,7 @@ class Brain:
         info += f"Action State: {self.fsm.action_state}\n\n"
 
         info += self.show_knowledge()
+
         info += f"Memory Limit: {self.memory_limit}\n\n"
         info += self.show_memory()
 
@@ -98,17 +99,17 @@ class Brain:
         summary_prompt = f"""
 角色名称：{self.name}
 初始记忆：{self.seed_memory}
-任务：从事件描述中总结信息和行为。
+任务：分析角色感知到的信息和作出的行为，基于角色第一视角进行思考，总结信息和行为。
 字数限制：不超过100字。
 事件描述：
 <<<
 {self.name}感知到的信息：{perception}
 {self.name}的行为：{output}
 >>>
-请提供一个简洁，陈述性的总结，不要添加额外格式，不要修改事件的实际内容或添加额外信息。
+请提供一个第一视角的陈述性的总结，不要添加额外格式，不要修改事件的实际内容或添加额外信息。
 """
         print(summary_prompt)
-        summary = apis.chatgpt(summary_prompt,0.5)  # 假设这个函数调用返回一个字符串摘要。
+        summary = apis.request_chatgpt(summary_prompt,0.5)  # 假设这个函数调用返回一个字符串摘要。
         embedding_list = apis.embedding(summary)  # 假设这个函数调用返回一个嵌入向量。
         time_string = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         memory = {
@@ -116,7 +117,7 @@ class Brain:
             "create_time": time_string,
             "embedding": embedding_list[0]
         }
-        logger.info(f"从{perception}和{output}中创建了新记忆：{summary}")
+        logger.info(f"从\"{perception}\"和\"{output}\"中创建了新记忆：{summary}")
         return memory
 
     def add_memory(self, memory):
@@ -156,7 +157,7 @@ class Brain:
         summary_prompt = f"""
 角色名称：{self.name}
 初始记忆：{self.seed_memory}
-任务：提取并总结一系列相似记忆描述中的关键信息。
+任务：基于角色第一视角进行思考，提取并总结一系列相似记忆描述中的关键信息。
 字数限制：不超过100字。
 记忆描述：
 <<<
@@ -165,7 +166,7 @@ class Brain:
 请以第一人称视角编写一个高语义层次的总结，不要改变原始记忆的内容或添加额外信息。
 """
         print(summary_prompt)
-        summary = apis.chatgpt(summary_prompt, 0.5)  # 假设这个函数调用返回一个字符串摘要。
+        summary = apis.request_chatgpt(summary_prompt, 0.5)  # 假设这个函数调用返回一个字符串摘要。
         print(summary)
         logger.info(f"从记忆子集：{descriptions_to_summarize}\n总结了相关记忆：{summary}")
         embedding_list = apis.embedding(summary)  # 假设这个函数调用返回一个嵌入向量。
@@ -294,7 +295,7 @@ class Brain:
 >>>
 请提供准确的、陈述性的知识点总结,不要改变原始内容或添加额外信息,不要丢失关键信息。
 """
-        summary = apis.chatgpt(summary_prompt, 0.3)
+        summary = apis.request_chatgpt(summary_prompt, 0.3)
         logger.info(f"从{source}提取了知识点：{summary}")
         return summary
 
@@ -341,14 +342,15 @@ class Brain:
         sub_knowledge_list (list): 子知识的列表，每个子知识通常包含文本描述等信息。
 
         返回:
-        无
+        子知识文件的路径
         """
-        sub_knowledge_file = f"../knowledge/{hash(summary_text)}_sub_knowledge.json"
+        sub_knowledge_file = f"../resource/knowledge/{hash(summary_text)}_sub_knowledge.json"
         with open(sub_knowledge_file, 'w', encoding="utf-8") as file:
             json.dump(sub_knowledge_list, file, ensure_ascii=False, indent=4)
 
         logger.info(f"为知识总结：{summary_text} 添加了子知识文件：{sub_knowledge_file}")
         self.add_knowledge_from_text(summary_text, sub_knowledge=sub_knowledge_file)
+        return sub_knowledge_file
 
     def del_knowledge(self, index=0, mode="single"):
         """
@@ -399,6 +401,23 @@ class Brain:
             print("已清空所有知识。")
             return "已清空所有知识。"
 
+    @classmethod
+    def show_sub_knowledge(self, sub_knowledge_file):
+        sub_knowledge_str = ""
+        try:
+            with open(sub_knowledge_file, 'r', encoding="utf-8") as file:
+                sub_knowledges = json.load(file)
+            sub_knowledge_str += f"子知识:\n"
+            for idx, sub_knowledge in enumerate(sub_knowledges,0):
+                sub_knowledge_str += (f"子知识 #{idx}\n"
+                                      f"描述:\n{sub_knowledge['text']}\n"
+                                      f"嵌入向量大小:{len(sub_knowledge['embedding'])}\n"
+                                      f"{'-' * 40}\n")
+        except FileNotFoundError:
+            sub_knowledge_str += "有子知识,子知识文件未找到或已被删除\n"
+
+        return sub_knowledge_str
+
     def show_knowledge(self):
         """
         展示知识库中的所有知识单元及其子知识（如果有）。
@@ -422,22 +441,18 @@ class Brain:
         for idx, knowledge in enumerate(self.basic_knowledge, 0):
             text = knowledge["text"]
             embedding_size = len(knowledge["embedding"])
+            sub_knowledge_file = knowledge.get("sub_knowledge")
             knowledge_str += (
                 f"知识 #{idx}\n"
                 f"描述: {text}\n"
                 f"嵌入向量大小: {embedding_size}\n"
+                f"子知识链接: {sub_knowledge_file}\n"
             )
             # 展示子知识
-            sub_knowledge_file = knowledge.get("sub_knowledge")
             if sub_knowledge_file:
-                try:
-                    with open(sub_knowledge_file, 'r', encoding="utf-8") as file:
-                        sub_knowledges = json.load(file)
-                    knowledge_str += f"子知识:\n"
-                    for sub_knowledge in sub_knowledges:
-                        knowledge_str += f"- {sub_knowledge['text']}\n"
-                except FileNotFoundError:
-                    knowledge_str += "有子知识,子知识文件未找到或已被删除\n"
+                sub_knowledge_str = self.show_sub_knowledge(sub_knowledge_file)
+                knowledge += sub_knowledge_str
+
             knowledge_str += f"{'-' * 40}\n"
 
         print(knowledge_str)
@@ -532,7 +547,7 @@ class Brain:
 """
         print(prompt)
         logger.info(f"生成了对话提示：{prompt}")
-        response = apis.chatgpt(prompt,1.0)
+        response = apis.request_chatgpt(prompt,1.0)
         print(response)
         logger.info(f"生成了回复：{response}")
         history.append(f"{response}")
@@ -556,7 +571,7 @@ class Brain:
 """
         print(prompt)
         logger.info(f"生成了思考提示：{prompt}")
-        thought = apis.chatgpt(prompt,1.0)
+        thought = apis.request_chatgpt(prompt,1.0)
         print(thought)
         logger.info(f"生成了思考内容：{thought}")
         return thought
@@ -578,7 +593,7 @@ class Brain:
 """
         print(prompt)
         logger.info(f"生成了思考提示：{prompt}")
-        thought = apis.chatgpt(prompt,1.0)
+        thought = apis.request_chatgpt(prompt,1.0)
         print(thought)
         logger.info(f"生成了思考内容：{thought}")
         return thought
@@ -613,7 +628,7 @@ class Brain:
 """
         print(prompt)
         logger.info(f"生成了对话提示：{prompt}")
-        response = apis.chatgpt(prompt,1.0)
+        response = apis.request_chatgpt(prompt,1.0)
         print(response)
         logger.info(f"生成了回复：{response}")
         history.append(f"{response}")

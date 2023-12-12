@@ -7,6 +7,7 @@ import json
 import openai
 import requests
 import tiktoken
+from gradio_client import Client
 
 encoding = tiktoken.encoding_for_model("gpt-3.5-turbo")
 openai.api_key = os.getenv('OPENAI_API_KEY')
@@ -14,8 +15,43 @@ tts_api_key = os.getenv('TTS_API_KEY')
 bing_api_key = os.getenv('BING_API_KEY')
 
 # easygpt接入点
-# openai.api_base = "https://chat.eqing.tech/v1/chat/completions"
-# openai.api_key = "NDAzNmJmMmItYmZhZC00ZDNjLTg5ZWItMjEzYjVmMmZmYTJi"
+easygpt_api_base = "https://chat.eqing.tech/v1/chat/completions"
+easygpt_api_key = "NDAzNmJmMmItYmZhZC00ZDNjLTg5ZWItMjEzYjVmMmZmYTJi"
+
+def request_chatgpt(prompt, temperature=0.8, api_key=easygpt_api_key, url=easygpt_api_base):
+    """
+    以requests库的方式调用OpenAI的GPT模型进行聊天。
+
+    参数:
+    prompt: 用户的输入消息。
+    temperature: 控制回答的随机性。
+    api_key: OpenAI提供的API密钥。
+    url: API的URL。
+
+    返回:
+    GPT模型的回复消息。
+    """
+
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {api_key}',
+    }
+
+    data = {
+        "model": "gpt-3.5-turbo",
+        "messages": [
+            {"role": "user", "content": prompt}
+        ],
+        "temperature": temperature
+    }
+
+    try:
+        response = requests.post(url=url, headers=headers, json=data)
+        return response.json()["choices"][0]["message"]["content"]
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return f"An error occurred: {e}"
 
 def chatgpt(prompt:str, temperature = 0.8) -> str:
     """
@@ -97,6 +133,26 @@ def tokens(text):
     num_tokens = len(encoding.encode(text))
     print("Token count:", num_tokens)
     return num_tokens
+
+def genshin_tts_v2(prompt, speaker):
+    client = Client("https://v2.genshinvoice.top/",output_dir="../resource/audios")
+    try:
+        result = client.predict(
+            prompt,
+            speaker,
+            0,  # float (numeric value between -1 and 9) in 'Emotion' Slider component
+            0.2,  # float (numeric value between 0 and 1) in 'SDP Ratio' Slider component
+            0.6,  # float (numeric value between 0.1 and 2) in 'Noise' Slider component
+            0.8,  # float (numeric value between 0.1 and 2) in 'Noise_W' Slider component
+            1,  # float (numeric value between 0.1 and 2) in 'Length' Slider component
+            "ZH",  # str (Option from: ['ZH', 'JP', 'EN', 'mix', 'auto']) in 'Language' Dropdown component
+            "https://github.com/gradio-app/gradio/raw/main/test/test_files/audio_sample.wav",
+            fn_index=2
+        )
+        return result[1]
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return "Error"
 
 def genshin_tts(text:str, speaker:str) -> str:
     """
@@ -208,4 +264,5 @@ def bing_search(query: str, mkt: str = "zh-CN") -> list:
         return f"An error occurred: {e}"
 
 if __name__ == "__main__":
-    audio_file_path = genshin_tts("我不在！有事请留言哟","胡桃")
+    print(request_chatgpt("你好"))
+    print(genshin_tts_v2("我不在！有事请留言哟","胡桃_ZH"))
