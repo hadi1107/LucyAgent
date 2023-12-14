@@ -16,11 +16,11 @@ bing_api_key = os.getenv('BING_API_KEY')
 
 # easygpt接入点
 easygpt_api_base = "https://chat.eqing.tech/v1/chat/completions"
-easygpt_api_key = "NDAzNmJmMmItYmZhZC00ZDNjLTg5ZWItMjEzYjVmMmZmYTJi"
+easygpt_api_key = os.getenv('EASYGPT_API_KEY')
 
 def request_chatgpt(prompt, temperature=0.8, api_key=easygpt_api_key, url=easygpt_api_base):
     """
-    以requests库的方式调用OpenAI的GPT模型进行聊天。
+    以requests库的方式调用自定义接入点的GPT模型进行聊天。
 
     参数:
     prompt: 用户的输入消息。
@@ -93,7 +93,7 @@ def instructgpt(prompt:str) -> str:
         # 创建一个指令完成任务
         completion = openai.Completion.create(
             model="gpt-3.5-turbo-instruct",  # 使用GPT-3.5-turbo-instruct模型
-            prompt=prompt,  # 用户的输入消息
+            prompt=prompt,
             temperature=0  # 控制输出的随机性，值为0表示输出确定性最高
         )
         response = completion.choices[0]['text']
@@ -127,7 +127,7 @@ def embedding(things:list or str) -> list:
 
     except Exception as e:
         print(f"An error occurred: {e}")
-        return f"An error occurred: {e}"
+        return None
 
 def tokens(text):
     num_tokens = len(encoding.encode(text))
@@ -135,7 +135,7 @@ def tokens(text):
     return num_tokens
 
 def genshin_tts_v2(prompt, speaker):
-    client = Client("https://v2.genshinvoice.top/",output_dir="../resource/audios")
+    client = Client("https://v2.genshinvoice.top/", output_dir="../resource/audios")
     try:
         result = client.predict(
             prompt,

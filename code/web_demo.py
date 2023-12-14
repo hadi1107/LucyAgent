@@ -249,6 +249,10 @@ if __name__ == "__main__":
                     return knowledge_str, split
 
             def add_knowledge_from_webpage(webpage_content, summary_text):
+                if not webpage_content:
+                    return "请输入要添加的知识内容哟"
+                if not summary_text:
+                    return "请输入总结文本！实在麻烦就复制一点~"
                 # 从页面输入获得知识
                 knowledge_str, split = split_text_and_add_to_knowledge(webpage_content, summary_text)
 
@@ -267,6 +271,10 @@ if __name__ == "__main__":
                          allow_flagging="never")
 
             def add_knowledge_from_pdf(pdf_path, summary_text):
+                if not pdf_path:
+                    return "请上传PDF哟"
+                if not summary_text:
+                    return "请输入总结文本！实在麻烦就复制一点~"
                 # 对pdf进行切分，直接加载到知识库
                 pdf_content = hutao.perception.read_pdf(pdf_path)
                 pairs_str, split = split_text_and_add_to_knowledge(pdf_content, summary_text)
@@ -286,6 +294,10 @@ if __name__ == "__main__":
                          allow_flagging="never")
 
             def add_knowledge_from_wiki(search_query, summary_text):
+                if not search_query:
+                    return "请输入要搜索的wiki对象名哟"
+                if not summary_text:
+                    return "请输入总结文本！实在麻烦就复制一点~"
                 # 获取wiki内容
                 wiki_object = hutao.action.use_wiki(search_query)
                 wiki_url = wiki_object['url']
