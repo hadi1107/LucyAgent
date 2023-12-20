@@ -121,7 +121,7 @@ class Perception:
         返回:
         包含所有文本端的知识单元列表。
         """
-        embeddings = apis.embedding(segments)
+        embeddings = apis.request_embedding(segments)
         knowledge_list = []
         for i in range(len(segments)):
             knowledge = {

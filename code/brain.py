@@ -110,7 +110,7 @@ class Brain:
 """
         print(summary_prompt)
         summary = apis.request_chatgpt(summary_prompt,0.5)  # 假设这个函数调用返回一个字符串摘要。
-        embedding_list = apis.embedding(summary)  # 假设这个函数调用返回一个嵌入向量。
+        embedding_list = apis.request_embedding(summary)  # 假设这个函数调用返回一个嵌入向量。
         time_string = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         memory = {
             "description": summary,
@@ -128,7 +128,6 @@ class Brain:
         # 检查记忆流是否达到上限，到达后就做总结
         if len(self.memory_stream) == self.memory_limit:
             self.summarize_memory()
-
 
     def summarize_memory(self):
         """以最新的记忆为标准，找到与其最语气相似的记忆对象，进行一次总结"""
@@ -169,7 +168,7 @@ class Brain:
         summary = apis.request_chatgpt(summary_prompt, 0.5)  # 假设这个函数调用返回一个字符串摘要。
         print(summary)
         logger.info(f"从记忆子集：{descriptions_to_summarize}\n总结了相关记忆：{summary}")
-        embedding_list = apis.embedding(summary)  # 假设这个函数调用返回一个嵌入向量。
+        embedding_list = apis.request_embedding(summary)  # 假设这个函数调用返回一个嵌入向量。
         time_string = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         memory = {
             "description": summary,
@@ -204,7 +203,7 @@ class Brain:
         elif mode == "search":
             if query:
                 # 搜索匹配的记忆
-                query_embedding = apis.embedding(query)[0]
+                query_embedding = apis.request_embedding(query)[0]
                 memory = self.search_memory(query_embedding)
                 if memory:
                     # 如果找到匹配的记忆，从记忆流中删除
@@ -328,7 +327,7 @@ class Brain:
         无
         """
         if text:
-            embedding_list = apis.embedding(text)
+            embedding_list = apis.request_embedding(text)
             knowledge = {
                 "text": text,
                 "embedding": embedding_list[0],
@@ -339,7 +338,7 @@ class Brain:
         else:
             logger.info(f"要添加的知识为空")
 
-    def add_knowledge_with_sub_knowledge(self, summary_text, sub_knowledge_list):
+    def add_knowledge_with_sub_knowledge_list(self, summary_text, sub_knowledge_list):
         """
         为具有子知识列表的知识总结创建一个JSON文件来存储子知识，并将知识总结添加到知识库中。
 
@@ -351,8 +350,12 @@ class Brain:
         子知识文件的路径
         """
         sub_knowledge_file = f"../resource/knowledge/{hash(summary_text)}_sub_knowledge.json"
+        sub_knowledge_content = {
+            "summary_text":summary_text,
+            "sub_knowledge_list":sub_knowledge_list
+        }
         with open(sub_knowledge_file, 'w', encoding="utf-8") as file:
-            json.dump(sub_knowledge_list, file, ensure_ascii=False, indent=4)
+            json.dump(sub_knowledge_content, file, ensure_ascii=False, indent=4)
 
         logger.info(f"为知识总结：{summary_text} 添加了子知识文件：{sub_knowledge_file}")
         self.add_knowledge_from_text(summary_text, sub_knowledge=sub_knowledge_file)
@@ -408,11 +411,34 @@ class Brain:
             return "已清空所有知识。"
 
     @classmethod
-    def show_sub_knowledge(self, sub_knowledge_file):
+    def get_all_sub_knowledge(cls):
+        sub_knowledge_dir = "../resource/knowledge"
+        sub_knowledge_list = []
+
+        # 遍历knowledge_dir文件夹
+        for root, dirs, files in os.walk(sub_knowledge_dir):
+            for file in files:
+                if file.endswith(".json"):
+                    file_path = os.path.join(root, file)
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        try:
+                            data = json.load(f)
+                            summary_text = data.get('summary_text', '')
+                            sub_knowledge_list.append({
+                                "sub_knowledge_file_path": file_path,
+                                "sub_knowledge_summary_text": summary_text
+                            })
+                        except json.JSONDecodeError:
+                            print(f"Error decoding JSON from file {file_path}")
+
+        return sub_knowledge_list
+
+    @classmethod
+    def show_sub_knowledge(cls, sub_knowledge_file):
         sub_knowledge_str = ""
         try:
             with open(sub_knowledge_file, 'r', encoding="utf-8") as file:
-                sub_knowledges = json.load(file)
+                sub_knowledges = json.load(file)["sub_knowledge_list"]
             sub_knowledge_str += f"子知识:\n"
             for idx, sub_knowledge in enumerate(sub_knowledges,0):
                 sub_knowledge_str += (f"子知识 #{idx}\n"
@@ -423,6 +449,64 @@ class Brain:
             sub_knowledge_str += "有子知识,子知识文件未找到或已被删除\n"
 
         return sub_knowledge_str
+
+    @classmethod
+    def add_knowledge_to_sub_knowledge_file(cls, sub_knowledge_file, text):
+        try:
+            with open(sub_knowledge_file, 'r', encoding="utf-8") as file:
+                data = json.load(file)
+                sub_knowledge_summary_text = data["summary_text"]
+                sub_knowledge_list = data["sub_knowledge_list"]
+            if text:
+                embedding_list = apis.request_embedding(text)
+                knowledge = {
+                    "text": text,
+                    "embedding": embedding_list[0],
+                    "sub_knowledge": None
+                }
+                sub_knowledge_list.append(knowledge)
+                logger.info(f"在{sub_knowledge_file}中添加了知识：{text}")
+            else:
+                logger.info(f"要添加的知识为空")
+                return f"要添加的知识为空"
+
+            with open(sub_knowledge_file, 'w', encoding="utf-8") as file:
+                sub_knowledge_content = {
+                    "summary_text": sub_knowledge_summary_text,
+                    "sub_knowledge_list": sub_knowledge_list
+                }
+                json.dump(sub_knowledge_content, file, ensure_ascii=False, indent=4)
+                return f"在{sub_knowledge_file}中添加了知识：{text}"
+
+        except Exception as e:
+            print(f"出现了异常：{e}")
+            return f"出现了异常：{e}"
+
+    @classmethod
+    def del_knowledge_from_sub_knowledge_file(cls, file_path, del_knowledge_index):
+        try:
+            with open(file_path, 'r', encoding="utf-8") as file:
+                data = json.load(file)
+
+            sub_knowledge_list = data.get("sub_knowledge_list", [])
+            if 0 <= del_knowledge_index < len(sub_knowledge_list):
+                text = sub_knowledge_list[del_knowledge_index]["text"]
+                del sub_knowledge_list[del_knowledge_index]
+                data["sub_knowledge_list"] = sub_knowledge_list
+            else:
+                print(f"下标不在合理范围，请检查嘞")
+                return f"下标不在合理范围，请检查嘞"
+
+            with open(file_path, 'w', encoding="utf-8") as file:
+                json.dump(data, file, ensure_ascii=False, indent=4)
+
+            logger.info(f"在{file_path}中删除了知识：{text}")
+            return f"在{file_path}中删除了知识：{text}"
+
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
+            return f"An unexpected error occurred: {e}"
+
 
     def show_knowledge(self):
         """
@@ -457,7 +541,7 @@ class Brain:
             # 展示子知识
             if sub_knowledge_file:
                 sub_knowledge_str = self.show_sub_knowledge(sub_knowledge_file)
-                knowledge += sub_knowledge_str
+                knowledge_str += sub_knowledge_str
 
             knowledge_str += f"{'-' * 40}\n"
 
@@ -502,7 +586,7 @@ class Brain:
         if sub_knowledge_file:
             try:
                 with open(sub_knowledge_file, 'r', encoding="utf-8") as file:
-                    sub_knowledges = json.load(file)
+                    sub_knowledges = json.load(file)["sub_knowledge_list"]
 
                 max_similarity = -1
                 most_similar_knowledge = None
@@ -524,7 +608,7 @@ class Brain:
         return knowledge_text
 
     def chat(self, user_input, history):
-        query_embedding = apis.embedding(user_input)[0]
+        query_embedding = apis.request_embedding(user_input)[0]
 
         if history is None:
             history = []
@@ -562,7 +646,7 @@ class Brain:
         return response, history
 
     def create_thought_from_perception(self, trigger):
-        trigger_embedding = apis.embedding(trigger)[0]
+        trigger_embedding = apis.request_embedding(trigger)[0]
         memory = self.search_memory(trigger_embedding)
         knowledge_text = self.search_knowledge(trigger_embedding)
         prompt = f"""
@@ -633,7 +717,7 @@ class Brain:
         history -- 更新后的对话历史列表
         thought -- 角色的思考内容
         """
-        query_embedding = apis.embedding(user_input)[0]
+        query_embedding = apis.request_embedding(user_input)[0]
 
         if history is None:
             history = []
@@ -678,17 +762,7 @@ if __name__ == "__main__":
         exit()
 
     hutao = LucyAgent(perception=None, brain=Brain.from_json(loaded_data), action=None)
-    print(hutao.brain.show_info())
+    all_sub_knowledge = Brain.get_all_sub_knowledge()
+    print(all_sub_knowledge)
+    Brain.add_knowledge_to_sub_knowledge_file(all_sub_knowledge[0]["sub_knowledge_file_path"],"宵宫是胡桃的好朋友")
 
-    query = "你好呀"
-    history = []
-    response, history = hutao.brain.chat(query, history)
-    history = []
-    response, history, thought = hutao.brain.cot_chat(query, history)
-
-    # 将更新后的大脑状态保存到JSON文件中。
-    try:
-        with open("../resource/hutao.json", "w", encoding="utf-8") as json_file:
-            json.dump(hutao.brain.to_json(), json_file, indent=4, ensure_ascii=False)
-    except IOError:
-        print("无法写入文件。")

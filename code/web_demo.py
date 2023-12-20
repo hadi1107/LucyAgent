@@ -137,7 +137,7 @@ if __name__ == "__main__":
                 image_path = hutao.brain.fsm.get_current_emoji()
 
                 # 生成响应的音频
-                audio_file_path = apis.genshin_tts_v2(prompt=response.lstrip("胡桃:"), speaker="胡桃_ZH")
+                audio_file_path = apis.genshin_tts(text=response.lstrip("胡桃:"), speaker="胡桃")
 
                 if audio_file_path == "Error":
                     default_audio_path = "../resource/audios/这是一段测试音频哟.wav"
@@ -169,7 +169,7 @@ if __name__ == "__main__":
                 with gr.Column():
                     agent_state = gr.Textbox(lines=25, max_lines=25, label="胡桃的Brain模块状态\U0001F4C4")
                     button = gr.Button("查询 \U0001F600")
-                    button.click(hutao.brain.show_info ,inputs=[], outputs=agent_state)
+                    button.click(hutao.brain.show_info, inputs=[], outputs=agent_state)
 
                 with gr.Column():
                     def del_memory(memory_index):
@@ -189,7 +189,9 @@ if __name__ == "__main__":
                     memory_dropdown = gr.Dropdown(memory_keys, label="要删除的记忆序号\U0001F600")
                     memory_deleted = gr.Textbox(label="已删除的胡桃记忆🧠")
                     button = gr.Button("删除记忆🧊")
-                    button.click(fn=del_memory, inputs=memory_dropdown, outputs=[memory_deleted, memory_dropdown])
+                    button.click(fn=del_memory,
+                                 inputs=memory_dropdown,
+                                 outputs=[memory_deleted, memory_dropdown])
 
                     def del_knowledge(knowledge_index):
                         knowledge_str = ""
@@ -226,7 +228,7 @@ if __name__ == "__main__":
                                                      min_length=max_unit_length,
                                                      buffer_min_length=int(max_unit_length*0.3))
                     knowledge_list = Perception.get_knowledge_list(segments)
-                    sub_knowledge_file = hutao.brain.add_knowledge_with_sub_knowledge(summary_text, knowledge_list)
+                    sub_knowledge_file = hutao.brain.add_knowledge_with_sub_knowledge_list(summary_text, knowledge_list)
                     knowledge_str += f"加入到知识库中的根知识为:{summary_text}\n\n其子知识文件路径为:{sub_knowledge_file}\n\n"
                     for idx, knowledge in enumerate(knowledge_list, 0):
                         knowledge_str += (f"知识单元{idx}\n"
@@ -243,7 +245,7 @@ if __name__ == "__main__":
                     save_agent_json(hutao.brain)
                     knowledge_str = (f"知识描述:\n{knowledge['text']}\n"
                                      f"嵌入向量大小:{len(knowledge['embedding'])}\n"
-                                     f"子知识文件路径：{knowledge['sub_knowledge']}\n"
+                                     f"由于输入的知识文本较短，没有发生切分或产生子知识文件\n"
                                      f"{'-' * 40}\n")
 
                     return knowledge_str, split
@@ -319,19 +321,62 @@ if __name__ == "__main__":
                          allow_flagging="never")
 
         with gr.Tab("管理子知识文件\U0001F4D6"):
-            sub_knowledge_json = gr.File(label="上传子知识文件📝")
-            sub_knowledge_text = gr.Textbox(label="子知识文件的内容📝")
-            gr.Interface(fn=Brain.show_sub_knowledge,
-                         inputs=sub_knowledge_json,
-                         outputs=sub_knowledge_text,
-                         allow_flagging="never")
+            sub_knowledge_list = Brain.get_all_sub_knowledge()
+            summary_to_path_map = {item["sub_knowledge_summary_text"]: item["sub_knowledge_file_path"]
+                                   for item in sub_knowledge_list}
+            sub_knowledge_summary_text_list = list(summary_to_path_map.keys())
+            sub_knowledge_dropdown = gr.Dropdown(label="子知识文件列表📝", choices=sub_knowledge_summary_text_list)
+            def show_sub_knowledge(summary_text):
+                # 使用总结文本来找文件
+                if not summary_text:
+                    return "下拉菜单为空或没有接收到下拉菜单的值"
+                # 使用映射来查找对应的文件路径
+                file_path = summary_to_path_map[summary_text]
+                # 读取文件并返回内容
+                return Brain.show_sub_knowledge(sub_knowledge_file=file_path)
 
-            add_knowledge_text = gr.Textbox(label="给子知识文件添加知识📚")
-            add_knowledge_text_button = gr.Button("添加知识📚")
-            del_knowledge_text = gr.Textbox(label="删除子知识文件的部分知识🧊")
-            add_knowledge_text_button = gr.Button("删除知识🧊")
+            def add_knowledge_to_sub_knowledge_file(summary_text, knowledge_text):
+                # 使用总结文本来找文件
+                if not summary_text:
+                    return "下拉菜单为空或没有接收到下拉菜单的值"
+                # 使用映射来查找对应的文件路径
+                file_path = summary_to_path_map[summary_text]
+                # 添加知识
+                return Brain.add_knowledge_to_sub_knowledge_file(file_path, knowledge_text)
 
-            feedback_text = gr.Textbox(label="相关操作的反馈📝")
+            def del_knowledge_from_sub_knowledge_file(summary_text, del_knowledge_index):
+                # 使用总结文本来找文件
+                if not summary_text:
+                    return "下拉菜单为空或没有接收到下拉菜单的值"
+                # 使用映射来查找对应的文件路径
+                file_path = summary_to_path_map[summary_text]
+                # 删除知识
+                try:
+                    int(del_knowledge_index)
+                except Exception as e:
+                    return f"输入内容无法转型为下标，请输入数值"
+                return Brain.del_knowledge_from_sub_knowledge_file(file_path, int(del_knowledge_index))
+
+            with gr.Row():
+                with gr.Column():
+                    sub_knowledge_text = gr.Textbox(label="子知识文件的内容📝")
+                    show_sub_knowledge_button = gr.Button(value="浏览子知识内容📝")
+                    show_sub_knowledge_button.click(fn=show_sub_knowledge,
+                                                    inputs=sub_knowledge_dropdown,
+                                                    outputs=sub_knowledge_text)
+                with gr.Column():
+                    add_knowledge_text = gr.Textbox(label="给子知识文件添加知识📚")
+                    add_knowledge_button = gr.Button("添加知识📚")
+                    del_knowledge_index = gr.Textbox(label="删除子知识文件的部分知识🧊")
+                    del_knowledge_button = gr.Button("删除知识🧊")
+
+                    feedback_text = gr.Textbox(label="相关操作的反馈📝")
+                    add_knowledge_button.click(fn=add_knowledge_to_sub_knowledge_file,
+                                               inputs=[sub_knowledge_dropdown, add_knowledge_text],
+                                               outputs=feedback_text)
+                    del_knowledge_button.click(fn=del_knowledge_from_sub_knowledge_file,
+                                               inputs=[sub_knowledge_dropdown, del_knowledge_index],
+                                               outputs=feedback_text)
 
 
         with gr.Tab("常用的Prompts\U0001F4AD"):

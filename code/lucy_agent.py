@@ -11,7 +11,6 @@ class LucyAgent:
         self.action = action
 
 if __name__ == "__main__":
-
     with open("../resource/hutao.json", "r", encoding="utf-8") as json_file:
         loaded_data = json.load(json_file)
 
@@ -23,8 +22,18 @@ if __name__ == "__main__":
     print(f"文本总长度:{len(text)}")
     segments = Perception.split_text(text,500,150)
     knowledge_list = Perception.get_knowledge_list(segments)
-    hutao.brain.add_knowledge_with_sub_knowledge(summary_text="宵宫是稻妻技艺最精湛的烟花专家，被誉为“夏祭的女王”。",
-                                                 sub_knowledge_list=knowledge_list)
-    hutao.brain.search_knowledge()
+    hutao.brain.add_knowledge_with_sub_knowledge_list(summary_text="宵宫是稻妻技艺最精湛的烟花专家，被誉为“夏祭的女王”。",
+                                                      sub_knowledge_list=knowledge_list)
 
+    query = "你好呀"
+    history = []
+    response, history, thought = hutao.brain.cot_chat(query, history)
+
+    print(hutao.brain.show_info())
+    # 将更新后的大脑状态保存到JSON文件中。
+    try:
+        with open("../resource/hutao.json", "w", encoding="utf-8") as json_file:
+            json.dump(hutao.brain.to_json(), json_file, indent=4, ensure_ascii=False)
+    except IOError:
+        print("无法写入文件。")
 

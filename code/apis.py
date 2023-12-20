@@ -9,8 +9,12 @@ import requests
 import tiktoken
 from gradio_client import Client
 
+# openai接入点
 encoding = tiktoken.encoding_for_model("gpt-3.5-turbo")
+openai_api_base = "https://api.openai.com/v1/embeddings"
 openai.api_key = os.getenv('OPENAI_API_KEY')
+
+# 外部api服务接入点
 tts_api_key = os.getenv('TTS_API_KEY')
 bing_api_key = os.getenv('BING_API_KEY')
 
@@ -52,6 +56,38 @@ def request_chatgpt(prompt, temperature=0.8, api_key=easygpt_api_key, url=easygp
     except Exception as e:
         print(f"An error occurred: {e}")
         return f"An error occurred: {e}"
+
+def request_embedding(things:list or str, api_key=openai.api_key, url=openai_api_base):
+    """
+    以requests库的方式调用自定义接入点的text-embedding-ada-002模型获取输入词语的embedding。
+
+    参数:
+    things: 需要获取embedding的词语，可以是一个词语的字符串或者是多个词语的列表。
+
+    返回:
+    输入词语的embedding列表。
+    """
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {api_key}',
+    }
+
+    data = {
+        'input': things,  # 需要获取embedding的词语
+        'model': "text-embedding-ada-002",  # 使用text-embedding-ada-002模型
+    }
+
+    try:
+        response = requests.post(url=url, headers=headers, json=data)
+        print(response.json())
+        # 获取返回的embedding数据
+        data = response.json()["data"]
+        embeddings = [item['embedding'] for item in data]
+        return embeddings
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
 
 def chatgpt(prompt:str, temperature = 0.8) -> str:
     """
@@ -140,15 +176,21 @@ def genshin_tts_v2(prompt, speaker):
         result = client.predict(
             prompt,
             speaker,
-            0,  # float (numeric value between -1 and 9) in 'Emotion' Slider component
             0.2,  # float (numeric value between 0 and 1) in 'SDP Ratio' Slider component
             0.6,  # float (numeric value between 0.1 and 2) in 'Noise' Slider component
             0.8,  # float (numeric value between 0.1 and 2) in 'Noise_W' Slider component
             1,  # float (numeric value between 0.1 and 2) in 'Length' Slider component
-            "ZH",  # str (Option from: ['ZH', 'JP', 'EN', 'mix', 'auto']) in 'Language' Dropdown component
+            "ZH,ZH",  # str (Option from: ['ZH', 'JP', 'EN', 'mix', 'auto']) in 'Language' Dropdown component
+            True,  # bool  in '按句切分    在按段落切分的基础上再按句子切分文本' Checkbox component
+            2,  # int | float (numeric value between 0 and 10) in '段间停顿(秒)，需要大于句间停顿才有效' Slider component
+            0.5,  # int | float (numeric value between 0 and 5) in '句间停顿(秒)，勾选按句切分才生效' Slider component
             "https://github.com/gradio-app/gradio/raw/main/test/test_files/audio_sample.wav",
+            "Howdy!",  # str  in 'Text prompt' Textbox component
+            "Howdy!",
+            0.1,  # int | float (numeric value between 0 and 1) in 'Weight' Slider component
             fn_index=2
         )
+        print(result)
         return result[1]
     except Exception as e:
         print(f"An error occurred: {e}")
@@ -264,5 +306,6 @@ def bing_search(query: str, mkt: str = "zh-CN") -> list:
         return f"An error occurred: {e}"
 
 if __name__ == "__main__":
-    print(request_chatgpt("你好"))
-    print(genshin_tts_v2("我不在！有事请留言哟","胡桃_ZH"))
+    # print(request_embedding("你好"))
+    # print(request_chatgpt("你好"))
+    print(genshin_tts("我不在！有事请留言哟","胡桃"))
