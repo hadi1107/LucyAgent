@@ -139,7 +139,7 @@ if __name__ == "__main__":
                 # 生成响应的音频
                 audio_file_path = apis.genshin_tts(text=response.lstrip("胡桃:"), speaker="胡桃")
 
-                if audio_file_path == "Error":
+                if not audio_file_path:
                     default_audio_path = "../resource/audios/这是一段测试音频哟.wav"
                     audio_file_path = default_audio_path
 
@@ -227,8 +227,8 @@ if __name__ == "__main__":
                     segments = Perception.split_text(content,
                                                      min_length=max_unit_length,
                                                      buffer_min_length=int(max_unit_length*0.3))
-                    knowledge_list = Perception.get_knowledge_list(segments)
-                    sub_knowledge_file = hutao.brain.add_knowledge_with_sub_knowledge_list(summary_text, knowledge_list)
+                    knowledge_list = Perception.generate_knowledge_units(segments)
+                    sub_knowledge_file = hutao.brain.add_knowledge_from_sub_knowledge_list(summary_text, knowledge_list)
                     knowledge_str += f"加入到知识库中的根知识为:{summary_text}\n\n其子知识文件路径为:{sub_knowledge_file}\n\n"
                     for idx, knowledge in enumerate(knowledge_list, 0):
                         knowledge_str += (f"知识单元{idx}\n"

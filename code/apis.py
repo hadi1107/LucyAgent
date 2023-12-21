@@ -6,15 +6,13 @@ import re
 import json
 import openai
 import requests
-import tiktoken
 from gradio_client import Client
 
 # openai接入点
-encoding = tiktoken.encoding_for_model("gpt-3.5-turbo")
 openai_api_base = "https://api.openai.com/v1/embeddings"
 openai.api_key = os.getenv('OPENAI_API_KEY')
 
-# 外部api服务接入点
+# TTS和搜索服务接入点
 tts_api_key = os.getenv('TTS_API_KEY')
 bing_api_key = os.getenv('BING_API_KEY')
 
@@ -33,7 +31,7 @@ def request_chatgpt(prompt, temperature=0.8, api_key=easygpt_api_key, url=easygp
     url: API的URL。
 
     返回:
-    GPT模型的回复消息。
+    GPT模型的回复消息。异常时返回None。
     """
 
     headers = {
@@ -51,11 +49,32 @@ def request_chatgpt(prompt, temperature=0.8, api_key=easygpt_api_key, url=easygp
 
     try:
         response = requests.post(url=url, headers=headers, json=data)
-        return response.json()["choices"][0]["message"]["content"]
+        response.raise_for_status()  # 将触发HTTP错误状态码的异常
 
+        # 检查API是否返回了预期的JSON结构
+        response_data = response.json()
+        if "choices" in response_data and response_data["choices"]:
+            message = response_data["choices"][0].get("message", {}).get("content")
+            if message:
+                return message
+            else:
+                raise ValueError("Response JSON does not contain 'message.content'.")
+        else:
+            raise ValueError("Response JSON does not contain 'choices' or is empty.")
+
+    except requests.exceptions.HTTPError as http_err:
+        print(f"HTTP error occurred: {http_err}")
+        print(f"Response body: {response.text}")
+        return None
+    except requests.exceptions.RequestException as req_err:
+        print(f"Request error occurred: {req_err}")
+        return None
+    except ValueError as val_err:
+        print(f"Value error: {val_err}")
+        return None
     except Exception as e:
-        print(f"An error occurred: {e}")
-        return f"An error occurred: {e}"
+        print(f"An unexpected error occurred: {e}")
+        return None
 
 def request_embedding(things:list or str, api_key=openai.api_key, url=openai_api_base):
     """
@@ -65,31 +84,49 @@ def request_embedding(things:list or str, api_key=openai.api_key, url=openai_api
     things: 需要获取embedding的词语，可以是一个词语的字符串或者是多个词语的列表。
 
     返回:
-    输入词语的embedding列表。
+    输入词语的embedding列表。异常时返回None。
     """
     headers = {
         'Content-Type': 'application/json',
         'Authorization': f'Bearer {api_key}',
     }
 
+    # 确保输入是列表格式
+    if isinstance(things, str):
+        things = [things]
+
     data = {
-        'input': things,  # 需要获取embedding的词语
+        'inputs': things,  # 需要获取embedding的词语
         'model': "text-embedding-ada-002",  # 使用text-embedding-ada-002模型
     }
 
     try:
         response = requests.post(url=url, headers=headers, json=data)
-        print(response.json())
-        # 获取返回的embedding数据
-        data = response.json()["data"]
-        embeddings = [item['embedding'] for item in data]
-        return embeddings
+        response.raise_for_status()  # 将触发HTTP错误状态码的异常
 
+        # 检查API是否返回了预期的JSON结构
+        response_data = response.json()
+        if "data" in response_data:
+            embeddings = [item['embedding'] for item in response_data["data"]]
+            return embeddings
+        else:
+            raise ValueError("Response JSON does not contain 'data'.")
+
+    except requests.exceptions.HTTPError as http_err:
+        print(f"HTTP error occurred: {http_err}")
+        print(f"Response body: {response.text}")
+        return None
+    except requests.exceptions.RequestException as req_err:
+        print(f"Request error occurred: {req_err}")
+        return None
+    except ValueError as val_err:
+        print(f"Value error: {val_err}")
+        return None
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"An unexpected error occurred: {e}")
         return None
 
-def chatgpt(prompt:str, temperature = 0.8) -> str:
+def chatgpt(prompt:str, temperature = 0.8):
     """
     使用OpenAI的GPT-3.5-turbo模型进行聊天。
 
@@ -97,7 +134,7 @@ def chatgpt(prompt:str, temperature = 0.8) -> str:
     prompt: 用户的输入消息。
 
     返回:
-    GPT模型的回复消息。
+    GPT模型的回复消息。异常时返回None。
     """
     try:
         completion = openai.ChatCompletion.create(
@@ -113,9 +150,9 @@ def chatgpt(prompt:str, temperature = 0.8) -> str:
 
     except Exception as e:
         print(f"An error occurred: {e}")
-        return f"An error occurred: {e}"
+        return None
 
-def instructgpt(prompt:str) -> str:
+def instructgpt(prompt:str):
     """
     使用OpenAI的GPT-3.5-turbo-instruct模型。
 
@@ -123,7 +160,7 @@ def instructgpt(prompt:str) -> str:
     prompt: 用户的输入消息。
 
     返回:
-    GPT模型的回复消息。
+    GPT模型的回复消息。异常时返回None。
     """
     try:
         # 创建一个指令完成任务
@@ -137,9 +174,9 @@ def instructgpt(prompt:str) -> str:
 
     except Exception as e:
         print(f"An error occurred: {e}")
-        return f"An error occurred: {e}"
+        return None
 
-def embedding(things:list or str) -> list:
+def embedding(things:list or str):
     """
     使用OpenAI的text-embedding-ada-002模型获取输入词语的embedding。
 
@@ -147,7 +184,7 @@ def embedding(things:list or str) -> list:
     things: 需要获取embedding的词语，可以是一个词语的字符串或者是多个词语的列表。
 
     返回:
-    输入词语的embedding列表。
+    输入词语的embedding列表。异常时返回None。
     """
     try:
         # 创建一个embedding任务
@@ -165,38 +202,45 @@ def embedding(things:list or str) -> list:
         print(f"An error occurred: {e}")
         return None
 
-def tokens(text):
-    num_tokens = len(encoding.encode(text))
-    print("Token count:", num_tokens)
-    return num_tokens
-
 def genshin_tts_v2(prompt, speaker):
+    """
+    使用原神TTS V2接口生成语音合成。
+
+    参数:
+    prompt (str): 需要合成的文本。
+    speaker (str): 选择的发言人。
+
+    返回:
+    result[1]: 生成的音频的URL或路径。异常时返回None。
+    """
+    # 创建Gradio客户端，指定接口URL和输出目录
     client = Client("https://v2.genshinvoice.top/", output_dir="../resource/audios")
     try:
+        # 调用Gradio接口的predict方法生成语音
         result = client.predict(
-            prompt,
-            speaker,
-            0.2,  # float (numeric value between 0 and 1) in 'SDP Ratio' Slider component
-            0.6,  # float (numeric value between 0.1 and 2) in 'Noise' Slider component
-            0.8,  # float (numeric value between 0.1 and 2) in 'Noise_W' Slider component
-            1,  # float (numeric value between 0.1 and 2) in 'Length' Slider component
-            "ZH,ZH",  # str (Option from: ['ZH', 'JP', 'EN', 'mix', 'auto']) in 'Language' Dropdown component
-            True,  # bool  in '按句切分    在按段落切分的基础上再按句子切分文本' Checkbox component
-            2,  # int | float (numeric value between 0 and 10) in '段间停顿(秒)，需要大于句间停顿才有效' Slider component
-            0.5,  # int | float (numeric value between 0 and 5) in '句间停顿(秒)，勾选按句切分才生效' Slider component
-            "https://github.com/gradio-app/gradio/raw/main/test/test_files/audio_sample.wav",
-            "Howdy!",  # str  in 'Text prompt' Textbox component
-            "Howdy!",
-            0.1,  # int | float (numeric value between 0 and 1) in 'Weight' Slider component
-            fn_index=2
+            prompt,  # 输入的文本
+            speaker,  # 选择的发言人
+            0.2,  # SDP比率，控制语音自然度
+            0.6,  # 噪声水平
+            0.8,  # 噪声权重
+            1,  # 语音长度调整
+            "ZH,ZH",  # 语言选项
+            True,  # 是否按句切分
+            2,  # 段间停顿秒数
+            0.5,  # 句间停顿秒数
+            "https://github.com/gradio-app/gradio/raw/main/test/test_files/audio_sample.wav",  # 音频样本URL
+            None,  # 文本提示
+            None,  # 辅助文本
+            0.1,  # 权重
+            fn_index=2  # 函数索引
         )
         print(result)
-        return result[1]
+        return result[1]  # 返回生成的音频的URL或路径
     except Exception as e:
         print(f"An error occurred: {e}")
-        return "Error"
+        return None
 
-def genshin_tts(text:str, speaker:str) -> str:
+def genshin_tts(text:str, speaker:str):
     """
     使用原神tts-api获取音频wav文件
 
@@ -205,7 +249,7 @@ def genshin_tts(text:str, speaker:str) -> str:
     speaker:转语音的音色
 
     返回:
-    音频文件的地址
+    音频文件的地址。异常时返回None。
     """
     url = "https://tts.ai-lab.top"
     data = {
@@ -224,10 +268,8 @@ def genshin_tts(text:str, speaker:str) -> str:
             print("Audio URL: ", response_data["audio"])
             print("Message: ", response_data["message"])
 
-            # 创建音频文件夹
+            # 固定的音频文件夹
             audio_folder = "../resource/audios"
-            if not os.path.exists(audio_folder):
-                os.makedirs(audio_folder)
 
             # 清理文本，移除或替换特殊字符,使用清理后的文本作为文件名
             clean_text = re.sub(r"[<>:\"/\\|?*]+", "_", text)
@@ -245,13 +287,15 @@ def genshin_tts(text:str, speaker:str) -> str:
             return audio_file_path
         else:
             print("Error: ", response.status_code)
-            return "Error"
+            return None
     except requests.exceptions.Timeout:
         print("Timeout occurred")
+        return None
     except Exception as e:
         print(f"An error occurred: {e}")
+        return None
 
-def bing_search(query: str, mkt: str = "zh-CN") -> list:
+def bing_search(query: str, mkt: str = "zh-CN"):
     """
     使用Bing搜索API搜索指定的查询字符串，并返回搜索结果的网页信息。
 
@@ -260,7 +304,7 @@ def bing_search(query: str, mkt: str = "zh-CN") -> list:
     mkt: str - 市场代码，默认为"zh-CN"
 
     返回:
-    search_results: 搜索结果的网页信息list，元素为url和概述的字典
+    search_results: 搜索结果的网页信息list，元素为url和概述的字典。异常时返回None。
     """
     try:
         url = "https://api.bing.microsoft.com/v7.0/search"
@@ -303,9 +347,11 @@ def bing_search(query: str, mkt: str = "zh-CN") -> list:
         return search_results
     except Exception as e:
         print(f"An error occurred: {e}")
-        return f"An error occurred: {e}"
+        return None
 
 if __name__ == "__main__":
     # print(request_embedding("你好"))
     # print(request_chatgpt("你好"))
-    print(genshin_tts("我不在！有事请留言哟","胡桃"))
+    print(genshin_tts("我不在！有事请留言哟", "胡桃"))
+    print(genshin_tts_v2("我不在！有事请留言哟", "胡桃_ZH"))
+

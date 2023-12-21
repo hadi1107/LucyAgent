@@ -2,15 +2,21 @@ import json
 import PyPDF2
 import apis
 
-class LucyAgent:
-    """代表一个具有感知、大脑和行为能力的智能代理。"""
-    def __init__(self, perception, brain, action):
-        self.perception = perception
-        self.brain = brain
-        self.action = action
-
 class Perception:
-    """代表智能代理的感知能力。"""
+    """
+    Perception 类，该类负责处理输入的文本数据，包括从 PDF 文件中读取文本、
+    将文本分割成多个段落以确保连贯性和上下文的理解，并且可以生成知识列表以供智能代理的
+    “大脑”处理。
+
+    主要功能包括：
+    - 读取 PDF 文件并提取文本内容。
+    - 将长文本分割成带有上下文的多个段落。
+    - 从文本段落中提取知识点，并生成知识列表。
+    - 将知识列表保存为 JSON 文件。
+
+    脚本使用了 PyPDF2 库来处理 PDF 文件，以及 apis 模块（自定义的）来请求文本的嵌入表示。
+    这个脚本是一个命令行工具，没有图形用户界面。
+    """
     def __init__(self):
         pass
 
@@ -111,33 +117,44 @@ class Perception:
         return segments
 
     @classmethod
-    def get_knowledge_list(cls, segments):
+    def generate_knowledge_units(cls, segments):
         """
-        从文本段中获取知识列表,供brain导入
+        从文本段落中生成知识单元，并请求每个段落的嵌入表示，以供智能代理的大脑导入和处理。
 
         参数:
         segments: 文本段落的列表。
 
         返回:
-        包含所有文本端的知识单元列表。
+        包含所有文本段落的知识单元列表。每个知识单元包含文本和对应的嵌入表示。
         """
-        embeddings = apis.request_embedding(segments)
-        knowledge_list = []
-        for i in range(len(segments)):
-            knowledge = {
-                "text": segments[i],
-                "embedding": embeddings[i],
-                "sub_knowledge": None
-            }
-            knowledge_list.append(knowledge)
+        try:
+            # 请求每个段落的嵌入表示
+            embeddings = apis.request_embedding(segments)
+        except Exception as e:
+            print(f"请求嵌入表示时发生错误：{e}")
+            return []
 
-        with open("../resource/knowledge_list.json", "w", encoding="utf-8") as f:
-            json.dump(knowledge_list, f, indent=4, ensure_ascii=False)
+        knowledge_units = []
+        for segment, embedding in zip(segments, embeddings):
+            if embedding:  # 确保嵌入表示有效
+                knowledge_unit = {
+                    "text": segment,
+                    "embedding": embedding,
+                    "sub_knowledge": None  # 预留字段，用于未来可能的扩展
+                }
+                knowledge_units.append(knowledge_unit)
 
-        return knowledge_list
+        # 尝试保存知识单元列表到 JSON 文件
+        try:
+            with open("../resource/knowledge_units.json", "w", encoding="utf-8") as f:
+                json.dump(knowledge_units, f, indent=4, ensure_ascii=False)
+        except IOError as e:
+            print(f"保存知识单元列表时发生错误：{e}")
+
+        return knowledge_units
 
 if __name__ == "__main__":
-    with open("../xiaogong.txt","r",encoding="utf-8") as f:
+    with open("../resource/xiaogong.txt", "r", encoding="utf-8") as f:
         text = f.read()
 
     print(f"文本总长度:{len(text)}")
