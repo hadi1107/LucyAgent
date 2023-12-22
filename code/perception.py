@@ -4,18 +4,14 @@ import apis
 
 class Perception:
     """
-    Perception 类，该类负责处理输入的文本数据，包括从 PDF 文件中读取文本、
-    将文本分割成多个段落以确保连贯性和上下文的理解，并且可以生成知识列表以供智能代理的
-    “大脑”处理。
+    Perception 类提供了从 PDF 文件中提取文本内容、将文本分割成段落、生成知识单元并请求其嵌入表示的功能。
 
-    主要功能包括：
-    - 读取 PDF 文件并提取文本内容。
-    - 将长文本分割成带有上下文的多个段落。
-    - 从文本段落中提取知识点，并生成知识列表。
-    - 将知识列表保存为 JSON 文件。
+    方法:
+    - read_pdf(pdf_path): 读取 PDF 文件并返回文本内容。
+    - split_text(text, min_length, buffer_min_length): 将文本分割成带有上下文缓冲区的段落。
+    - generate_knowledge_units(segments): 从文本段落中生成知识单元并请求嵌入表示。
 
-    脚本使用了 PyPDF2 库来处理 PDF 文件，以及 apis 模块（自定义的）来请求文本的嵌入表示。
-    这个脚本是一个命令行工具，没有图形用户界面。
+    这个类无需实例化，因为所有方法都是类方法。它主要用于处理和准备知识数据，以便智能代理可以更好地理解和处理信息。
     """
     def __init__(self):
         pass
@@ -152,16 +148,3 @@ class Perception:
             print(f"保存知识单元列表时发生错误：{e}")
 
         return knowledge_units
-
-if __name__ == "__main__":
-    with open("../resource/xiaogong.txt", "r", encoding="utf-8") as f:
-        text = f.read()
-
-    print(f"文本总长度:{len(text)}")
-    segments = Perception.split_text(text,500,0)
-    for segment in segments:
-        print(f"文本段长度：{len(segment)}\n{segment}\n")
-
-    segments = Perception.split_text(text,500,100)
-    for segment in segments:
-        print(f"文本段长度：{len(segment)}\n{segment}\n")

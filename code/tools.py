@@ -1,6 +1,3 @@
-"""
-tools.py:定义一些工具性的agent可用函数
-"""
 import json
 import requests
 from bs4 import BeautifulSoup
@@ -17,7 +14,7 @@ def play_wav(wave_file:str) -> None:
     play_obj = wave_obj.play()
     play_obj.wait_done()
 
-def scrape_webpage(url: str) -> dict:
+def scrape_webpage(url: str):
     """
     爬取指定URL的网页，提取并返回网页的标题和所有文本内容。
 
@@ -61,10 +58,12 @@ def scrape_webpage(url: str) -> dict:
 
     except requests.HTTPError as http_err:
         print(f"HTTP error occurred: {http_err}")
+        return None
     except Exception as err:
         print(f"An unexpected error occurred: {err}")
+        return None
 
-def get_wikipedia_text(search_query:str, language='zh')->dict:
+def get_wikipedia_text(search_query:str, language='zh'):
     """
     搜索Wikipedia并获取与查询最相关的页面的完整内容。
 
@@ -100,7 +99,8 @@ def get_wikipedia_text(search_query:str, language='zh')->dict:
 
         # 检查是否有搜索结果
         if not search_results:
-            return 'No search results found.'
+            print('No search results found.')
+            return None
 
         # 获取最相关页面的标题
         relevant_page_title = search_results[0]['title']
@@ -131,23 +131,15 @@ def get_wikipedia_text(search_query:str, language='zh')->dict:
         content = pages[page_id].get('extract', 'No content available.')
 
         return {
-            "url":page_url,
-            "content":content
+            "url": page_url,
+            "content": content
         }
 
     except requests.exceptions.HTTPError as http_err:
-        return f"HTTP error occurred: {http_err}"
+        print(f"HTTP error occurred: {http_err}")
+        return None
     except Exception as err:
-        return f"An unexpected error occurred: {err}"
+        print(f"An unexpected error occurred: {err}")
+        return None
 
-# 使用示例
-if __name__ == "__main__":
-    url = "https://zhuanlan.zhihu.com/p/664880302"
-    web_page_object = scrape_webpage(url)
-    print( web_page_object["text"])
-
-    # page_title = "绝区零"
-    # wiki_obejct = get_wikipedia_text(page_title)
-    # print(wiki_obejct["url"])
-    # print(wiki_obejct["content"])
 

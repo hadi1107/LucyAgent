@@ -3,32 +3,36 @@ import json
 import tools
 import apis
 
-class LucyAgent:
-    """代表一个具有感知、大脑和行为能力的智能代理。"""
-    def __init__(self, perception, brain, action):
-        self.perception = perception
-        self.brain = brain
-        self.action = action
-
 class Action:
-    """代表智能代理的行为能力。当前未实现具体功能。"""
+    """
+    Action 类封装了与 OpenAI GPT-3 模型进行交互的方法，以及其他外部工具和API的调用。
+
+    方法:
+    - chatgpt_function(prompt): 使用chatgpt的function call功能来处理用户输入。
+    - use_wiki(search_query): 使用维基百科API检索信息。
+    - use_scraper(url): 使用网络爬虫工具抓取网页内容。
+    - use_bing(query): 使用Bing搜索API进行网络搜索。
+
+    该类的目的是提供一个接口来调用不同的功能和API，以便于集成到更大的系统中。
+    """
+
     def __init__(self):
         pass
 
     def chatgpt_function(self, prompt: str):
         """
-        使用chatgpt的function call功能
+        使用chatgpt的function call功能。
 
-        参数：
-        prompt: 用户输入
+        参数:
+        - prompt: 用户输入的提示信息。
 
-        返回：
-        chatgpt输出或function调用结果
+        返回:
+        - chatgpt输出或function调用结果。
         """
         functions = [
             {
                 "name": "use_wiki",
-                "description": f"检索wiki百科以补充不了解的知识",
+                "description": "检索wiki百科以补充不了解的知识",
                 "parameters": {
                     "type": "object",
                     "properties": {
@@ -52,16 +56,16 @@ class Action:
         )
         message = response["choices"][0]["message"]
 
-        if (message.get("function_call")):
+        if message.get("function_call"):
             # 解析函数名和函数参数
             function_name = message["function_call"]["name"]
             arguments = json.loads(message["function_call"]["arguments"])
 
-            if (function_name == "use_wiki"):
+            if function_name == "use_wiki":
                 try:
                     query = arguments['query']
                     wiki_object = self.use_wiki(query)
-                    print(f"use_wiki success,query : {query}")
+                    print(f"use_wiki success, query: {query}")
                     return wiki_object
                 except Exception as e:
                     print(f"An error occurred: {e}")
@@ -69,21 +73,41 @@ class Action:
         else:
             return message["content"]
 
-    def use_wiki(self,search_query):
+    def use_wiki(self, search_query):
         """
-        return {
-            "url":page_url,
-            "content":content
-        }
+        使用维基百科API检索信息。
+
+        参数:
+        - search_query: 需要检索的查询字符串。
+
+        返回:
+        - 包含URL和内容的字典。
         """
         wiki_object = tools.get_wikipedia_text(search_query)
         return wiki_object
 
-    # def use_scraper(self,url):
-    #     page_object = tools.scrape_webpage(url)
-    #     return page_object
-    #
-    # def use_bing(self,query):
-    #     bing_obejct = apis.bing_search(query)
-    #     return bing_obejct
+    def use_scraper(self, url):
+        """
+        使用网络爬虫工具抓取网页内容。
 
+        参数:
+        - url: 需要抓取的网页URL。
+
+        返回:
+        - 抓取的网页内容。
+        """
+        page_object = tools.scrape_webpage(url)
+        return page_object
+
+    def use_bing(self, query):
+        """
+        使用Bing搜索API进行网络搜索。
+
+        参数:
+        - query: 搜索查询字符串。
+
+        返回:
+        - 搜索结果对象。
+        """
+        bing_object = apis.bing_search(query)
+        return bing_object

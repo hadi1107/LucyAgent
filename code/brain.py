@@ -26,7 +26,46 @@ def cosine_similarity(embedding1, embedding2):
     return dot_product / (norm1 * norm2)
 
 class Brain:
-    """代表智能代理的大脑，负责记忆和知识处理。"""
+    """
+    Brain 类代表智能代理的大脑，负责记忆和知识处理。
+
+    属性:
+    - name: 代理的名称。
+    - seed_memory: 代理的初始记忆。
+    - language_style: 代理的语言风格。
+    - mood_list: 情绪列表。
+    - emoji_list: 表情符号列表。
+    - action_state_list: 行为状态列表。
+    - basic_knowledge: 基础知识库。
+    - memory_stream: 记忆流。
+    - fsm: 代理的有限状态机。
+
+    方法:
+    - to_json(): 将 Brain 的状态转换为 JSON 格式的字典。
+    - from_json(json_data): 从 JSON 格式的数据创建 Brain 实例。
+    - show_info(): 创建一个描述大脑状态的字符串。
+    - create_memory(perception, output): 根据感知和输出创建记忆。
+    - add_memory(memory): 将记忆添加到记忆流中。
+    - summarize_memory(): 总结记忆。
+    - del_memory(index, mode, query): 从记忆流中删除记忆。
+    - show_memory(): 展示所有记忆。
+    - search_memory(query_embedding): 搜索记忆。
+    - add_knowledge_from_text(text, sub_knowledge_file_path): 添加知识。
+    - add_knowledge_from_sub_knowledge_list(summary_text, sub_knowledge_list): 添加子知识列表。
+    - del_knowledge(mode, index): 删除知识。
+    - get_all_sub_knowledge(): 获取所有子知识。
+    - show_sub_knowledge(sub_knowledge_file_path): 显示子知识。
+    - add_knowledge_to_sub_knowledge_file(sub_knowledge_file_path, knowledge_text): 添加知识到子知识文件。
+    - del_knowledge_from_sub_knowledge_file(sub_knowledge_file_path, knowledge_index_to_delete): 从子知识文件中删除知识。
+    - show_knowledge(): 展示知识库。
+    - search_knowledge(query_embedding): 搜索知识。
+    - chat(user_query, conversation_history): 生成回复。
+    - create_thought_from_perception(perceived_info): 生成内心想法。
+    - create_thought_from_query(memory, knowledge_text, context): 生成思考内容。
+    - cot_chat(user_input, conversation_history): 生成角色回复。
+
+    该类提供了一系列方法来处理和维护智能代理的记忆和知识，以及生成对话和内心想法。
+    """
     def __init__(self, name, seed_memory, language_style,
                  mood_list, emoji_list, action_state_list,
                  basic_knowledge, memory_stream):

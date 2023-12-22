@@ -1,6 +1,3 @@
-"""
-apis.py:定义需要apikey的api调用功能
-"""
 import os
 import re
 import json
@@ -349,9 +346,4 @@ def bing_search(query: str, mkt: str = "zh-CN"):
         print(f"An error occurred: {e}")
         return None
 
-if __name__ == "__main__":
-    # print(request_embedding("你好"))
-    # print(request_chatgpt("你好"))
-    print(genshin_tts("我不在！有事请留言哟", "胡桃"))
-    print(genshin_tts_v2("我不在！有事请留言哟", "胡桃_ZH"))
 

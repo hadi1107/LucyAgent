@@ -6,24 +6,6 @@ from action import Action
 from brain import Brain
 from lucy_agent import LucyAgent
 
-# 本来应该是提供一些物件的接口供agent查询或感知，然后再转化成这种自然语言描述。
-# 比如胡桃本身有一个位置属性，在往生堂，就应该感知不到咖啡店那边的信息。
-# 但总的来说，决策还是基于自然语言去做，因而可以这样模拟。
-# 拒绝回答和行动的能力同样重要。
-# 可以拆分成:xx事件发生,然后根据胡桃的状态和位置判断逻辑 -> 自然语言描述
-# 比如：
-# "咖啡店前台信息传来：hadi点了一杯拿铁","胡桃在往生堂" -> 不触发，返回胡桃没感觉到
-# "hadi在往生堂门口向胡桃打招呼"，"胡桃在往生堂" -> 触发并生成描述：胡桃听到了hadi在打招呼，看到了hadi在往生堂门口。
-
-hutao_place = "往生堂"
-
-EVENTS_LIST = [
-    ("hadi在往生堂门口,向胡桃打招呼。", "往生堂"),
-    ("璃月管委会向胡桃发消息,内容为：往生堂第七十七代堂主,您好。近来璃月要举行一场特别的送别之仪,请您着手策划。", "全局"),
-    ("hadi在咖啡店前台点了一杯拿铁。", "咖啡店"),
-    ("胡桃的闹钟响了,查看后发现备注为：记得看看璃月的历史书！", "全局")
-]
-
 PERCEPTION_LIST = [
     "胡桃听到了hadi在打招呼。",
     "胡桃收到了璃月管委会的消息,内容为：往生堂第七十七代堂主,您好。近来璃月要举行一场特别的送别之仪,请您着手策划。",
@@ -41,11 +23,9 @@ def load_prompts(json_file: str) -> dict:
     return {item['key']: item['prompt'] for item in data}
 
 def save_agent_json(agent_brain):
-    # 存到“中文name.json”当中，不影响用来初始化的文件
+    # 默认存到 “中文name.json” 当中，不影响用来初始化的文件
     name = agent_brain.name
     file_path = f"../resource/{name}.json"
-    # 用来修改初始化文件
-    # file_path = f"../resource/hutao.json"
     try:
         with open(file_path, "w", encoding="utf-8") as json_file:
             json.dump(agent_brain.to_json(), json_file, indent=4, ensure_ascii=False)
@@ -53,17 +33,16 @@ def save_agent_json(agent_brain):
         print("无法写入文件。")
 
 if __name__ == "__main__":
-    # 用初始json进行初始化
     with open("../resource/hutao.json", "r", encoding="utf-8") as json_file:
         loaded_data = json.load(json_file)
 
     perception = Perception()
     action = Action()
-    hutao = LucyAgent(perception=perception, brain=Brain.from_json(loaded_data), action=action)
+    brain = Brain.from_json(loaded_data)
+    hutao = LucyAgent(perception, brain, action)
 
     # 创建一个 Gradio 界面
     with gr.Blocks() as demo:
-
         # 创建一个状态对象，用于存储历史记录
         state = gr.State([])
 
@@ -377,7 +356,6 @@ if __name__ == "__main__":
                     del_knowledge_button.click(fn=del_knowledge_from_sub_knowledge_file,
                                                inputs=[sub_knowledge_dropdown, del_knowledge_index],
                                                outputs=feedback_text)
-
 
         with gr.Tab("常用的Prompts\U0001F4AD"):
             # 加载预制prompt
