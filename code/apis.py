@@ -93,7 +93,7 @@ def request_embedding(things:list or str, api_key=openai.api_key, url=openai_api
         things = [things]
 
     data = {
-        'inputs': things,  # 需要获取embedding的词语
+        'input': things,  # 需要获取embedding的词语
         'model': "text-embedding-ada-002",  # 使用text-embedding-ada-002模型
     }
 

@@ -147,17 +147,17 @@ class Brain:
             return None
 
         summary_prompt = f"""
-    角色名称：{self.name}
-    初始记忆：{self.seed_memory}
-    任务：分析角色感知到的信息和作出的行为，基于角色第一视角进行思考，总结信息和行为。
-    字数限制：不超过100字。
-    事件描述：
-    <<<
-    {self.name}感知到的信息：{perception}
-    {self.name}的行为：{output}
-    >>>
-    请提供一个第一视角的陈述性的总结，不要添加额外格式，不要修改事件的实际内容或添加额外信息。
-    """
+角色名称：{self.name}
+初始记忆：{self.seed_memory}
+任务：分析角色感知到的信息和作出的行为，基于角色第一视角进行思考，总结信息和行为。
+字数限制：不超过100字。
+事件描述：
+<<<
+{self.name}感知到的信息：{perception}
+{self.name}的行为：{output}
+>>>
+请提供一个第一视角的陈述性的总结，不要添加额外格式，不要修改事件的实际内容或添加额外信息。
+"""
         print(summary_prompt)
 
         summary = apis.request_chatgpt(summary_prompt, 0.5)  # 假设这个函数调用返回一个字符串摘要。
@@ -568,7 +568,7 @@ class Brain:
                 sub_knowledge_items = file_data["sub_knowledge_list"]
 
             sub_knowledge_details += f"摘要:\n{summary_text}\n\n子知识:\n"
-            for idx, sub_knowledge in enumerate(sub_knowledge_items, 1):
+            for idx, sub_knowledge in enumerate(sub_knowledge_items, 0):
                 sub_knowledge_details += (f"子知识 #{idx}\n"
                                           f"描述:\n{sub_knowledge['text']}\n"
                                           f"嵌入向量大小:{len(sub_knowledge['embedding'])}\n"
@@ -918,5 +918,4 @@ class Brain:
         logger.info(f"生成了回复：{character_response}")
         conversation_history.append(character_response)
         return character_response, conversation_history, character_thought
-
 

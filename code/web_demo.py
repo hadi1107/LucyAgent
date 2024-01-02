@@ -48,15 +48,15 @@ if __name__ == "__main__":
 
         with gr.Tab("和胡桃互动！\U0001F917"):
             def show_action_state():
-                scene_path = ""
+                scene_path = "../resource/pictures/hutao_xiuxi.webp"
                 if hutao.brain.fsm.action_state == "休息":
                     scene_path = "../resource/pictures/hutao_xiuxi.webp"
-                if hutao.brain.fsm.action_state == "看书":
+                if hutao.brain.fsm.action_state == "看璃月的历史书":
                     scene_path = "../resource/pictures/hutao_kanshu.webp"
-                if hutao.brain.fsm.action_state == "策划往生堂相关活动":
-                    scene_path = "../resource/pictures/hutao_cehua.jpg"
+                if hutao.brain.fsm.action_state == "策划往生堂的特别活动":
+                    scene_path = "../resource/pictures/hutao_cehua.jfif"
                 if hutao.brain.fsm.action_state == "做咖啡并递交给客户":
-                    scene_path = "../resource/pictures/hutao_coffee.jpg"
+                    scene_path = "../resource/pictures/hutao_coffee.webp"
                 if hutao.brain.fsm.action_state == "回复问题和聊天":
                     scene_path = "../resource/pictures/hutao_yao.webp"
                 return f"胡桃正在{hutao.brain.fsm.action_state}", scene_path
@@ -300,9 +300,11 @@ if __name__ == "__main__":
                          allow_flagging="never")
 
         with gr.Tab("管理子知识文件\U0001F4D6"):
+            summary_to_path_map = {}
             sub_knowledge_list = Brain.get_all_sub_knowledge()
-            summary_to_path_map = {item["sub_knowledge_summary_text"]: item["sub_knowledge_file_path"]
-                                   for item in sub_knowledge_list}
+            if sub_knowledge_list:
+                summary_to_path_map = {item["summary_text"]: item["file_path"]
+                                       for item in sub_knowledge_list}
             sub_knowledge_summary_text_list = list(summary_to_path_map.keys())
             sub_knowledge_dropdown = gr.Dropdown(label="子知识文件列表📝", choices=sub_knowledge_summary_text_list)
             def show_sub_knowledge(summary_text):
@@ -312,7 +314,7 @@ if __name__ == "__main__":
                 # 使用映射来查找对应的文件路径
                 file_path = summary_to_path_map[summary_text]
                 # 读取文件并返回内容
-                return Brain.show_sub_knowledge(sub_knowledge_file=file_path)
+                return Brain.show_sub_knowledge(file_path)
 
             def add_knowledge_to_sub_knowledge_file(summary_text, knowledge_text):
                 # 使用总结文本来找文件

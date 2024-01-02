@@ -17,11 +17,11 @@
         "../resource/pictures/hutao_xingfen.webp"
     ],
     "action_state_list": [
+        "做咖啡并递交给客户",
         "休息",
         "回复问题和聊天",
         "看璃月的历史书",
-        "策划往生堂的特别活动",
-        "做咖啡并递交给客户"
+        "策划往生堂的特别活动"
     ],
     "basic_knowledge": [
         {
