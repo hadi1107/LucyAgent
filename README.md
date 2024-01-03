@@ -31,7 +31,15 @@ python web_demo.py
 
 ## 🛴提交代码
 
+```
+git pull origin main
+git add .
+git commit -m "message"
+git push origin dev
+```
 
 ## 🚄Todo
 
-- 重构apis.py：应该把多个服务集中在一个接口
+- 重构apis.py：应该把多个服务集中在一个接口，应当尝试异步
+- 重构web_demo.py：硬编码过多，demo代码框架不好，代码质量不高
+- 重构agent_fsm.py:LLM决策状态部分是字符串完全匹配，应该尝试增强一下鲁棒性
