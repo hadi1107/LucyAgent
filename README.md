@@ -20,6 +20,18 @@
 
 ![示例图片](./markdown/talk.png)
 
+## 🔧 相关技术报告
+
+[LLM应用：利用子知识结构实现多级RAG](https://zhuanlan.zhihu.com/p/671429602)
+
+[基于Embedding相似度的对话好感度分析](https://zhuanlan.zhihu.com/p/672262215)
+
+[LLM风格化对话中的Prompt工程](https://zhuanlan.zhihu.com/p/671966233)
+
+[Agent综述：《The Rise and Potential of Large Language Model Based Agents：A Survey》相关解读](https://zhuanlan.zhihu.com/p/671599535)
+
+[LLM知识库导入的细节：平滑的文本分割](https://zhuanlan.zhihu.com/p/671295504)
+
 ## 🚕上手
 
 检查apis.py文件，选择对应服务，设置相关api-key环境变量。设置完成后：
