@@ -18,7 +18,14 @@
 
 ## 💬 Gradio Demo一览
 
+### 状态
+![示例图片](./markdown/state.png)
+
+### 对话
 ![示例图片](./markdown/talk.png)
+
+### log
+![示例图片](./markdown/log.png)
 
 ## 🔧 相关技术报告
 
