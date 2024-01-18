@@ -6,6 +6,7 @@ from action import Action
 from brain import Brain
 from lucy_agent import LucyAgent
 
+# 简单的事件模拟，本来应该在沙盒环境里面去定义。沙盒环境相关工程量太大了，暂时没做。
 PERCEPTION_LIST = [
     "胡桃听到了hadi在打招呼。",
     "胡桃收到了璃月管委会的消息,内容为：往生堂第七十七代堂主,您好。近来璃月要举行一场特别的送别之仪,请您着手策划。",
