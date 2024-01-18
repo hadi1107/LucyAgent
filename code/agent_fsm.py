@@ -79,16 +79,16 @@ class AgentFSM:
         # 构建推理心情转移的提示信息
         mood_transition_prompt = f"""
 任务：推理角色的下一个心情应该是什么。心情可以是不变的。下面有一个例子给你作为参考，实际推理和例子无关。
-例如：胡桃的原先心情是开心，胡桃在对话中了解到璃月管委会要拆迁往生堂。胡桃认为：为什么突然要拆迁往生堂？作为往生堂堂主，我应该进一步询问并考量。结合起来，应当输出的心情为：“惊讶”。
+例如：胡桃的原先心情是开心，胡桃在对话中了解到璃月管委会要拆迁往生堂。胡桃认为：为什么突然要拆迁往生堂？作为往生堂堂主，我应该进一步询问并考量。结合起来，你应当输出的心情为：惊讶。
 <<<
 角色当前心情：{self.mood}
 观察到的事件：{trigger}
 角色的想法：{thought}
 可能的心情列表：{self.mood_list}
 >>>
-现在请根据角色目前的心情状态,观察到的事件和角色想法的具体内容,从可能的心情列表中选择一个心情，例如“{self.mood_list[0]}”。精确地输出心情名称，不要进行额外的输出。
+现在请根据角色目前的心情状态,观察到的事件和角色想法的具体内容,从可能的心情列表中选择一个心情，例如：{self.mood_list[0]}。
+精确地输出心情名称，不要进行额外的输出。
 """
-        # 打印提示信息
         print(mood_transition_prompt)
 
         # 发送请求并获取响应
@@ -98,18 +98,14 @@ class AgentFSM:
             print(f"请求处理过程中发生错误：{e}")
             return None
 
-        # 打印响应结果
         print(f"输出心情为:{response}")
 
         # 处理响应结果
         new_mood = response.strip()
-
-        # 检查新心情是否在心情列表中
         if new_mood not in self.mood_list:
             print(f"错误：推理出的新心情'{new_mood}'不在可能的心情列表中。")
             return None
 
-        # 返回新心情
         return new_mood
 
     def get_current_emoji(self):
@@ -180,7 +176,8 @@ class AgentFSM:
 角色的想法：{thought}
 可能的行动列表：{self.action_state_list}
 >>>
-现在请根据角色目前的行动状态,观察到的事件和角色想法的具体内容，从可能的行动列表中选择一个行动，例如{self.action_state_list[0]}。精确地输出行动名称，不要进行额外的输出。
+现在请根据角色目前的行动状态,观察到的事件和角色想法的具体内容，从可能的行动列表中选择一个行动，例如：{self.action_state_list[0]}。
+精确地输出行动名称，不要进行额外的输出。
 """
         print(action_state_transition_prompt)
         response = apis.request_chatgpt(action_state_transition_prompt, temperature=0.5)

@@ -29,11 +29,11 @@
 
 ## 🔧 相关技术报告
 
+[LLM风格化对话中的Prompt工程](https://zhuanlan.zhihu.com/p/671966233)
+
 [LLM应用：利用子知识结构实现多级RAG](https://zhuanlan.zhihu.com/p/671429602)
 
 [基于Embedding相似度的对话好感度分析](https://zhuanlan.zhihu.com/p/672262215)
-
-[LLM风格化对话中的Prompt工程](https://zhuanlan.zhihu.com/p/671966233)
 
 [Agent综述：《The Rise and Potential of Large Language Model Based Agents：A Survey》相关解读](https://zhuanlan.zhihu.com/p/671599535)
 
@@ -45,7 +45,7 @@
 ```
 python web_demo.py
 ```
-由于项目结构简单，需要更改角色配置时，查看resource文件夹，对hutao.json和其他文件进行修改。
+由于项目结构简单，需要更改角色配置时，直接查看resource文件夹，对hutao.json和其他文件进行修改即可。
 亦可使用web_demo.py在web界面上改变角色配置。
 
 ## 🛴提交代码
@@ -58,10 +58,10 @@ git push origin dev
 ```
 
 ## 🚄Todo
-- 重构hutao.json：必须认识到，初始知识库条数太少，反而影响对话质量。
+- 重构hutao.json：需要加初始知识。初始知识库条数太少，反而影响对话质量。
 - 重构apis.py：应该把多个服务集中在一个接口，且应当尝试异步调用。
 - 重构web_demo.py：硬编码过多，demo代码框架不好，代码质量不高。
 - 重构agent_fsm.py：LLM决策状态部分是字符串完全匹配，应该尝试增强一下鲁棒性。
-- 优化prompt：应当在所有内部思考相关的prompt当中加入对“人”的认识。
-- 优化embedding模型，摸索自行训练的方法。
-- 优化TTS模型，当前的模型API会出现httpError。
+- 优化prompt：应当在所有内部思考相关的prompt当中加入对“玩家”的认识。
+- 优化embedding模型：摸索自行训练的方法。
+- 优化TTS模型：当前的模型API会出现httpError。

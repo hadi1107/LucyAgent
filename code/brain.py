@@ -140,7 +140,7 @@ class Brain:
         返回:
         - memory: dict 包含记忆描述、创建时间和嵌入向量的字典。如果输入无效或API调用失败，则返回None。
         """
-        logger.info(f"开始执行创建记忆,perception为:{perception},output为:{output}")
+        logger.info(f"开始执行创建记忆：\nperception为:{perception}\noutput为:{output}")
         # 检查感知和输出是否为空
         if not perception or not output:
             logger.error(f"感知(perception)或输出(output)为空。无法创建记忆。")
@@ -158,7 +158,7 @@ class Brain:
 >>>
 请提供一个第一视角的陈述性的总结，不要添加额外格式，不要修改事件的实际内容或添加额外信息。
 """
-        print(summary_prompt)
+        logger.info(f"生成了执行创建记忆的prompt：\n{summary_prompt}")
 
         summary = apis.request_chatgpt(summary_prompt, 0.5)  # 假设这个函数调用返回一个字符串摘要。
         if not summary:
@@ -190,7 +190,7 @@ class Brain:
         返回:
         - None
         """
-        logger.info(f"开始执行添加记忆")
+        logger.info(f"开始执行添加记忆:")
         # 检查记忆是否是一个字典且包含所有必要的键
         if (not isinstance(memory, dict) or
                 "description" not in memory or "create_time" not in memory or "embedding" not in memory):
@@ -216,7 +216,7 @@ class Brain:
         - 如果记忆流为空或仅包含一个记忆，则不执行总结。
         - 如果相似度计算或API请求失败，则记录错误。
         """
-        logger.info(f"开始执行总结记忆")
+        logger.info(f"开始执行总结记忆:")
         # 检查记忆流是否有足够的记忆进行总结
         if len(self.memory_stream) < 5:
             logger.error("记忆流中的记忆不足，无法进行总结。")
@@ -237,7 +237,7 @@ class Brain:
             for i in sorted(top_indices, reverse=True):
                 description = self.memory_stream[i]["description"]
                 del self.memory_stream[i]
-                logger.info(f"因为需要总结而删除了记忆：{description}")
+                logger.info(f"因为需要总结而删除了记忆：\n{description}")
 
             # 创建总结记忆的提示信息
             summary_prompt = f"""
@@ -280,7 +280,7 @@ class Brain:
         返回：
         执行删除操作的相关反馈。
         """
-        logger.info(f"开始执行删除记忆,query为:{query}")
+        logger.info(f"开始执行删除记忆:\nquery为:\n{query}")
         if mode == "single":
             try:
                 description = self.memory_stream[index]["description"]
@@ -331,7 +331,7 @@ class Brain:
         # 检查记忆流是否为空
         if not self.memory_stream:
             memory_str = "没有记忆单元\n"
-            logger.info(memory_str)  # 使用logger记录信息
+            logger.info(f"展示记忆时，发现{memory_str}")
             return memory_str
 
         # 计算记忆流中记忆单元的数量
@@ -353,7 +353,7 @@ class Brain:
                 f"{'-' * 40}\n"
             )
 
-        logger.info(memory_str)  # 使用logger记录信息
+        logger.info(f"展示了记忆：{memory_str}")  # 使用logger记录信息
         return memory_str
 
     def search_memory(self, query_embedding):
