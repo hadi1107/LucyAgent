@@ -50,6 +50,7 @@ def request_chatgpt(prompt, temperature=0.8, api_key=easygpt_api_key, url=easygp
 
         # 检查API是否返回了预期的JSON结构
         response_data = response.json()
+        print(response_data)
         if "choices" in response_data and response_data["choices"]:
             message = response_data["choices"][0].get("message", {}).get("content")
             if message:
@@ -211,28 +212,25 @@ def genshin_tts_v2(prompt, speaker):
     result[1]: 生成的音频的URL或路径。异常时返回None。
     """
     # 创建Gradio客户端，指定接口URL和输出目录
-    client = Client("https://v2.genshinvoice.top/", output_dir="../resource/audios")
     try:
-        # 调用Gradio接口的predict方法生成语音
+        client = Client("https://v2.genshinvoice.top/")
         result = client.predict(
-            prompt,  # 输入的文本
-            speaker,  # 选择的发言人
-            0.2,  # SDP比率，控制语音自然度
-            0.6,  # 噪声水平
-            0.8,  # 噪声权重
-            1,  # 语音长度调整
-            "ZH,ZH",  # 语言选项
-            True,  # 是否按句切分
-            2,  # 段间停顿秒数
-            0.5,  # 句间停顿秒数
-            "https://github.com/gradio-app/gradio/raw/main/test/test_files/audio_sample.wav",  # 音频样本URL
-            None,  # 文本提示
-            None,  # 辅助文本
-            0.1,  # 权重
-            fn_index=2  # 函数索引
+            "Howdy!",  # str  in '输入文本内容' Textbox component
+            "派蒙_ZH,派蒙_ZH",
+            0,
+            0.1,  # int | float (numeric value between 0.1 and 2) in 'Noise' Slider component
+            0.1,  # int | float (numeric value between 0.1 and 2) in 'Noise_W' Slider component
+            0.1,  # int | float (numeric value between 0.1 and 2) in 'Length' Slider component
+            "ZH,ZH",  # str (Option from: [('ZH', 'ZH')]) in 'Language' Dropdown component
+            "https://github.com/gradio-app/gradio/raw/main/test/test_files/audio_sample.wav",
+            # str (filepath on your computer (or URL) of file) in 'Audio prompt' Audio component
+            "Howdy!",  # str  in 'Text prompt' Textbox component
+            "Text prompt",  # str  in 'Prompt Mode' Radio component
+            "Howdy!",  # str  in '辅助文本' Textbox component
+            0,  # int | float (numeric value between 0 and 1) in 'Weight' Slider component
+            fn_index=0
         )
-        print(result)
-        return result[1]  # 返回生成的音频的URL或路径
+        return result  # 返回生成的音频的URL或路径
     except Exception as e:
         print(f"An error occurred: {e}")
         return None
@@ -346,4 +344,7 @@ def bing_search(query: str, mkt: str = "zh-CN"):
         print(f"An error occurred: {e}")
         return None
 
+if __name__ == "__main__":
+    print(embedding("nihao"))
+    genshin_tts_v2("你好","胡桃")
 
