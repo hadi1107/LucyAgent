@@ -891,13 +891,10 @@ class Brain:
 
         if conversation_history is None:
             conversation_history = []
-        conversation_history.append(f"hadi:{user_input}")
-
-        conversation_context = "\n".join(conversation_history)
 
         related_memory = self.search_memory(user_input_embedding)
         related_knowledge = self.search_knowledge(user_input_embedding)
-        character_thought = self.create_thought_from_query(related_memory, related_knowledge, conversation_context)
+        character_thought = self.create_thought_from_query(related_memory, related_knowledge, conversation_history)
 
         reply_prompt = f"""
 角色名称：{self.name}
@@ -909,13 +906,12 @@ class Brain:
 思考内容：“{character_thought}”
 对话上下文：
 {self.language_style}
-{conversation_context}
+{conversation_history}
 >>>
 请在思考内容和对话上下文的基础上，以{self.name}的身份回复。不要扮演其他角色或添加额外信息，不要添加其他格式。
 """
         logger.info(f"生成了对话提示：{reply_prompt}")
         character_response = apis.request_chatgpt(reply_prompt, 1.0)
         logger.info(f"生成了回复：{character_response}")
-        conversation_history.append(character_response)
         return character_response, conversation_history, character_thought
 
